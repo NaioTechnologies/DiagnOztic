@@ -1,52 +1,64 @@
 package com.naio.net;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 public class NetClient {
 
-    /**
-     * Maximum size of buffer
-     */
-    public static final int BUFFER_SIZE = 2048;
-    private Socket socket = null;
-    private OutputStream out = null;
-    private InputStream in = null;
+	/**
+	 * Maximum size of buffer
+	 */
+	private Socket socket = null;
+	private OutputStream out = null;
+	private InputStream in = null;
 
-    private String host = null;
-    private String macAddress = null;
-    private int port = 7999;
+	private String host = null;
+	private String macAddress = null;
+	private int port = 7999;
+	public SocketChannel socketChannel;
 
+	/**
+	 * Constructor with Host, Port and MAC Address
+	 * 
+	 * @param host
+	 * @param port
+	 * @param macAddress
+	 */
+	public NetClient(String host, int port, String macAddress) {
+		this.host = host;
+		this.port = port;
+		this.macAddress = macAddress;
+	}
 
-    /**
-     * Constructor with Host, Port and MAC Address
-     * @param host
-     * @param port
-     * @param macAddress
-     */
-    public NetClient(String host, int port, String macAddress) {
-        this.host = host;
-        this.port = port;
-        this.macAddress = macAddress;
-    }
+	public void connectWithServer() {
+		try {
+			if (socketChannel == null) {
+				socketChannel = SocketChannel.open();
+				socketChannel.configureBlocking(false);
+				socketChannel.connect(new InetSocketAddress(this.host,
+						this.port));
+				while (!socketChannel.finishConnect()) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-    public void connectWithServer() {
-        try {
-            if (socket == null) {
-                socket = new Socket(this.host, this.port);
-                out = socket.getOutputStream();
-                in = socket.getInputStream();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
+	/**
 	 * @return the out
 	 */
 	public OutputStream getOut() {
@@ -61,27 +73,37 @@ public class NetClient {
 	}
 
 	public void disConnectWithServer() {
-        if (socket != null) {
-            if (socket.isConnected()) {
-                try {
-                    in.close();
-                    out.close();
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+		if (socketChannel != null) {
+
+			try {
+				socketChannel.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	public boolean testConnection() {
+		ByteBuffer buff = null;
+		buff = ByteBuffer.allocate(1);
+		buff.array()[0] = 0x1;
+		int harRead = -1;
+		try {
+			harRead = socketChannel.write(buff);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return harRead > -1;
+	}
 
 	public void close() {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 }

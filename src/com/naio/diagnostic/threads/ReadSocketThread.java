@@ -22,13 +22,11 @@ public class ReadSocketThread extends Thread {
 	private final Object lock1 = new Object();
 	private final Object lock2 = new Object();
 	public ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<String>();
-	private MemoryBuffer memoryBuffer;
 	private int port;
 	private NewMemoryBuffer newmemoryBuffer;
 
 	public ReadSocketThread(MemoryBuffer memoryBuffer, int port) {
 		this.port = port;
-		this.memoryBuffer = memoryBuffer;
 		queue = new ConcurrentLinkedQueue<String>();
 		this.stop = true;
 	}
@@ -42,7 +40,7 @@ public class ReadSocketThread extends Thread {
 
 	public void run() {
 		int charsRead = 0;
-		byte[] buffer = new byte[Config.BUFFER_SIZE];
+		ByteBuffer buffer = ByteBuffer.allocate(Config.BUFFER_SIZE);
 		if (port == Config.PORT_LOG)
 			netClient = new NetClient(Config.HOST2, port, "0");
 		else
@@ -50,39 +48,38 @@ public class ReadSocketThread extends Thread {
 		netClient.connectWithServer();
 		try {
 			while (this.stop) {
-				if (netClient.getIn() != null) {
-					if ((charsRead = netClient.getIn().read(buffer)) != -1) {
-						
-						if (memoryBuffer == null) {
-							newmemoryBuffer.addToFifo(buffer, charsRead);
-						} else {
-							memoryBuffer.addToFifo(buffer, charsRead);
+				if (netClient.socketChannel != null) {
+					if ((charsRead = netClient.socketChannel.read(buffer)) > -1) {
+
+						if(charsRead>0){
+							newmemoryBuffer.addToFifo(buffer.array(), charsRead, buffer.arrayOffset());
+							buffer.clear();
 						}
+						if(!netClient.testConnection()){
+							netClient.disConnectWithServer();
+							stop = false;
+							}
 						try {
 							Thread.sleep(0, 10);
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					} else {
-						if(charsRead == -1){
 							Log.e("states","close");
-							netClient.disConnectWithServer();
-							stop = false;
-						}
+							
 					}
 				} else {
 					//Log.e("socket", "pas de in");
 					/*try {
 						Thread.sleep(1, 10);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					}*/
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 		}
 

@@ -37,15 +37,14 @@ public class NewMemoryBuffer {
 		CurrentPacketSize = 0;
 	}
 
-	public void addToFifo(byte[] bytes, int bytesRead) {
+	public void addToFifo(byte[] bytes, int bytesRead, int offset) {
 		
 		//byte[] bytes = bytess.clone();
-		//Log.e("index","bytesRead   " + bytesRead);
 		try {
 			int idx = 0;
 			
 			while (idx < bytesRead) {
-				this.WorkingBuffer[this.CurrentBufferPos] = bytes[idx];
+				this.WorkingBuffer[this.CurrentBufferPos] = bytes[offset+idx];
 				//Log.e("index",""+idx + "  read:"+bytesRead);
 				// TEST PROTOCOL VERSION
 				if (this.CurrentBufferPos == 5) {

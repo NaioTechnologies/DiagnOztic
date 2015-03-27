@@ -65,7 +65,7 @@ public class Config {
 	public static final int ID_SMS = 17;
 	public static final int ID_ODO_PACKET = 18;
 
-	public static final int BUFFER_SIZE = 2048;
+	public static final int BUFFER_SIZE = 1024*32;
 	
 	public static final String FILE_SAVE_GPS = "bilan.naio";
 
