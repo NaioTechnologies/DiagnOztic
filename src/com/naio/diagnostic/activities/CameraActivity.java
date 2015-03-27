@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import com.naio.diagnostic.R;
 
+import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.threads.ReadSocketThread;
 
 import com.naio.diagnostic.trames.LogTrame;
@@ -344,145 +345,68 @@ public class CameraActivity extends FragmentActivity {
 	}
 
 	private void display_image() {
-		for (int waz = 0; waz < 2; waz++) {
-			if (waz == 0) {
-				LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog
-						.getPollAntepenultiemeFifo());
-			}
-			if (waz == 1) {
-				LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog
-						.getPollFifo());
-			}
-			byte[] data = DataManager.getInstance().getPollFifoImage();
-			if (data == null)
-				return;
-			byte[] dataf = Arrays.copyOfRange(data,
-					Config.LENGHT_FULL_HEADER + 3, data.length
-							- Config.LENGHT_CHECKSUM);
-			Bitmap bm;
-			if (data[Config.LENGHT_FULL_HEADER + 2] == 1) {
-				bm = BitmapFactory.decodeByteArray(dataf, 0, dataf.length);
-				if (bm == null)
-					return;
 
-				plane.loadBitmap(bm);
-			} else {// greyscale here
-				/*
-				 * byte[] dataf2 = Arrays.copyOfRange(dataf, 6, dataf.length -
-				 * Config.LENGHT_CHECKSUM);
-				 */
-				/*
-				 * short width = ByteBuffer.wrap(new
-				 * byte[]{dataf[1],dataf[0]}).getShort(0); short height =
-				 * ByteBuffer.wrap(new byte[]{dataf[3],dataf[2]}).getShort(0);
-				 */
-				byte[] Bits = new byte[752 * 480 * 4 /* width*height*4 */]; // That's
-																			// where
-																			// the
-																			// RGBA
-				// array goes.
-
-				int i;
-				for (i = 0; i < dataf.length; i++) {
-					Bits[i * 4] = Bits[i * 4 + 1] = Bits[i * 4 + 2] = (byte) dataf[i];
-					Bits[i * 4 + 3] = -1;// 0xff, that's the alpha.
-				}
-
-				// Now put these nice RGBA pixels into a Bitmap object
-
-				bm = Bitmap.createBitmap(752, 480, Bitmap.Config.ARGB_8888);
-				bm.copyPixelsFromBuffer(ByteBuffer.wrap(Bits));
-
-			}
-
-			/*
-			 * if (data[Config.LENGHT_FULL_HEADER + 1] == 0) {
-			 * imageview.setImageBitmap(bm); } else {
-			 * 
-			 * imageview_r.setImageBitmap(bm);
-			 * 
-			 * }
-			 */
-			ArrayList<float[]> dataPoints2d = DataManager.getInstance()
-					.getPollFifoPoints2D();
-			ArrayList<float[]> dataPoints3d = DataManager.getInstance()
-					.getPollFifoPoints3D();
-			if (dataPoints2d == null && dataPoints3d == null) {
-				plane.loadBitmap(bm);
-				return;
-			}
-			if (dataPoints3d == null) {
-				float w = dataPoints2d.get(0)[0];
-				float h = dataPoints2d.get(0)[1];
-				float xa = 0, ya = 0;
-
-				for (int i = 1; i < dataPoints2d.size(); i++) {
-					float x = dataPoints2d.get(i)[0];
-					float y = dataPoints2d.get(i)[1];
-					Canvas canvas = new Canvas(bm);
-					Paint paint = new Paint();
-					paint.setAntiAlias(true);
-					paint.setColor(Color.BLUE);
-					canvas.drawCircle(x - 1, y - 1, 6, paint);
-
-					if (arrayPoints.size() <= i - 1) {
-						arrayPoints.add(new float[] { x, y });
-					} else {
-						arrayPoints.get(i - 1)[0] = x;
-						arrayPoints.get(i - 1)[1] = y;
-					}
-					if (i - 1 <= arrayPoints.size()
-							&& i == (dataPoints2d.size() - 1)) {
-						int s = arrayPoints.size();
-						for (int j = (i - 1); j < s; j++) {
-							arrayPoints.remove(j);
-						}
-					}
-				}
-			} else // points 3d
-			{
-				float w = dataPoints3d.get(0)[0];
-				float h = dataPoints3d.get(0)[1];
-				float d = dataPoints3d.get(0)[2];
-				float xa = 0, ya = 0;
-
-				for (int i = 1; i < dataPoints3d.size(); i++) {
-					float x = dataPoints3d.get(i)[0];
-					float y = dataPoints3d.get(i)[1];
-					float z = dataPoints3d.get(i)[2];
-					Canvas canvas = new Canvas(bm);
-					Paint paint = new Paint();
-					paint.setAntiAlias(true);
-					Log.e("zpoint", x+"--"+y+"--" + z);
-					if (z <= 0)
-						paint.setColor(Color.BLUE);
-					if (z <= -1)
-						paint.setColor(Color.GREEN);
-					if (z <= -2)
-						paint.setColor(Color.YELLOW);
-					if (z >= 1)
-						paint.setColor(Color.RED);
-					if (z >= 2)
-						paint.setColor(Color.WHITE);
-					canvas.drawCircle(x - 1, y - 1, 6, paint);
-
-					if (arrayPoints3d.size() <= i - 1) {
-						arrayPoints3d.add(new float[] { x, y });
-					} else {
-						arrayPoints3d.get(i - 1)[0] = x;
-						arrayPoints3d.get(i - 1)[1] = y;
-					}
-					if (i - 1 <= arrayPoints3d.size()
-							&& i == (dataPoints3d.size() - 1)) {
-						int s = arrayPoints3d.size();
-						for (int j = (i - 1); j < s; j++) {
-							arrayPoints3d.remove(j);
-						}
-					}
-				}
-			}
+		OdometryPacket odoPacket = (OdometryPacket) trameDecoder
+				.decode(memoryBufferLog.getPollFifo());
+		if (odoPacket == null)
+			return;
+		if(odoPacket.getJpegtrame() == null)
+			return;
+		byte[] dataf = odoPacket.getJpegtrame().getImgData();
+		if (dataf == null)
+			return;
+		Bitmap bm;
+		bm = BitmapFactory.decodeByteArray(dataf, 0, dataf.length);
+		if (bm == null)
+			return;
+		if(odoPacket.getPointtrame() == null){
 			plane.loadBitmap(bm);
+			return;
 		}
+		Log.e("camera","abc");
+		ArrayList<float[]> dataPoints3d = odoPacket.getPointtrame()
+				.getArrayListPoints3DFloat();
+		if (dataPoints3d == null) {
+			plane.loadBitmap(bm);
+			return;
+		}
+		Bitmap mutableBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
+		Log.e("camera","size data "+dataPoints3d.size());
+		for (int i = 0; i < dataPoints3d.size(); i++) {
+			float x = dataPoints3d.get(i)[0];
+			float y = dataPoints3d.get(i)[1];
+			float z = dataPoints3d.get(i)[2];
+			Canvas canvas = new Canvas(mutableBitmap);
+			Paint paint = new Paint();
+			paint.setAntiAlias(true);
+			Log.e("zpoint", x + "--" + y + "--" + z);
+			if (z <= 0)
+				paint.setColor(Color.BLUE);
+			if (z <= -1)
+				paint.setColor(Color.GREEN);
+			if (z <= -2)
+				paint.setColor(Color.YELLOW);
+			if (z >= 1)
+				paint.setColor(Color.RED);
+			if (z >= 2)
+				paint.setColor(Color.WHITE);
+			canvas.drawCircle(x - 1, y - 1, 6, paint);
+
+			/*if (arrayPoints3d.size() <= i - 1) {
+				arrayPoints3d.add(new float[] { x, y });
+			} else {
+				arrayPoints3d.get(i - 1)[0] = x;
+				arrayPoints3d.get(i - 1)[1] = y;
+			}
+			if (i - 1 <= arrayPoints3d.size() && i == (dataPoints3d.size() - 1)) {
+				int s = arrayPoints3d.size();
+				for (int j = (i - 1); j < s; j++) {
+					arrayPoints3d.remove(j);
+				}
+			}*/
+		}
+		plane.loadBitmap(mutableBitmap);
+
 	}
 
 	@Override

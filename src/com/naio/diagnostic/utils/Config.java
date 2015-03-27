@@ -2,7 +2,7 @@ package com.naio.diagnostic.utils;
 
 public class Config {
 
-	public static final String HOST = "192.168.1.110";//"10.42.0.1";//debian/*"192.168.1.110";//joan*///"192.168.1.149";//moi//
+	public static final String HOST = "192.168.1.149";//"10.42.0.1";//debian/*"192.168.1.110";//joan*///"192.168.1.149";//moi//
 	public static final String HOST2 = "192.168.1.149";
 
 	public static final int PORT_GPS = 3334;
@@ -63,6 +63,7 @@ public class Config {
 	public static final int ID_ACTUATOR = 15;
 	public static final int ID_LED = 16;
 	public static final int ID_SMS = 17;
+	public static final int ID_ODO_PACKET = 18;
 
 	public static final int BUFFER_SIZE = 2048;
 	
@@ -74,6 +75,7 @@ public class Config {
 	public static final int BYTES_SIZE_W_H_D = 6;
 	public static final int POINTS2D_SIZE_IN_BYTES = 8;
 	public static final int POINTS3D_SIZE_IN_BYTES = 12;
+	
 	
 
 }

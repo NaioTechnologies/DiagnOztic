@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="lib" path="/home/bodereau/Téléchargements/net.sourceforge.juint-1.0/net.sourceforge.juint-1.0.jar"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/google-play-services_lib"/>
+	<classpathentry exported="true" kind="lib" path="/home/bodereau/Téléchargements/osmdroid-android-4.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/bodereau/Téléchargements/slf4j-android-1.6.1-RC1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/bodereau/Téléchargements/robotium-solo-5.3.1.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry exported="true" kind="lib" path="/OSMBonusPack/bin/osmbonuspack.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/bodereau/Téléchargements/osmdroid-third-party-3.0.8.jar"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

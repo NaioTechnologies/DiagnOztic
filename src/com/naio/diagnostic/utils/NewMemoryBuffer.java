@@ -73,7 +73,7 @@ public class NewMemoryBuffer {
 					this.CurrentPacketSize = ByteBuffer.wrap(size).getInt();
 					/*this.WorkingBuffer[12]=0x1;
 					this.WorkingBuffer[13]=0x2;*/
-					//Log.e("sizeTot",""+this.CurrentPacketSize + "and the fucking bytes :"+"--"+this.WorkingBuffer[0]+"--"+this.WorkingBuffer[1]+"--"+this.WorkingBuffer[2]+"--"+this.WorkingBuffer[3]+"--"+this.WorkingBuffer[4]+"--"+this.WorkingBuffer[5]+"--"+this.WorkingBuffer[6]+"---"+this.WorkingBuffer[7]+"--" + this.WorkingBuffer[8]+"--"+this.WorkingBuffer[9]+"--"+this.WorkingBuffer[10]+"--"+this.WorkingBuffer[11]+"--"+this.WorkingBuffer[12]+"--"+this.WorkingBuffer[13]);
+					Log.e("sizeTot",""+this.CurrentPacketSize + "and the fucking bytes :"+"--"+this.WorkingBuffer[0]+"--"+this.WorkingBuffer[1]+"--"+this.WorkingBuffer[2]+"--"+this.WorkingBuffer[3]+"--"+this.WorkingBuffer[4]+"--"+this.WorkingBuffer[5]+"--"+this.WorkingBuffer[6]+"---"+this.WorkingBuffer[7]+"--" + this.WorkingBuffer[8]+"--"+this.WorkingBuffer[9]+"--"+this.WorkingBuffer[10]+"--"+this.WorkingBuffer[11]+"--"+this.WorkingBuffer[12]+"--"+this.WorkingBuffer[13]);
 					
 					// TODO:Trouble !!!!!!
 					if (this.CurrentPacketSize > this.CurrentMaxPacketSize) {
@@ -118,6 +118,9 @@ public class NewMemoryBuffer {
 			break;
 		case (byte) Config.ID_ODO:
 			maxPacketLenght = 4;
+			break;
+		case (byte) Config.ID_ODO_PACKET:
+			maxPacketLenght = 500000000;
 			break;
 		/*
 		 * case (byte)PacketIds.WatchDogPacketId: maxPacketLenght = (uint)32;

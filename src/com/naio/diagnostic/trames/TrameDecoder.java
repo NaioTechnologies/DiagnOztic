@@ -2,6 +2,7 @@ package com.naio.diagnostic.trames;
 
 import android.util.Log;
 
+import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.utils.Config;
 
 public class TrameDecoder {
@@ -42,6 +43,8 @@ public class TrameDecoder {
 			return new MagnetoTrame(pollFifo);
 		case Config.ID_WATCHDOG :
 			return new WatchdogTrame(pollFifo);
+		case Config.ID_ODO_PACKET :
+			return new OdometryPacket(pollFifo);
 		default:
 			break;
 		}
