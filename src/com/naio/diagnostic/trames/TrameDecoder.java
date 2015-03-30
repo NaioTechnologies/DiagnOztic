@@ -2,6 +2,7 @@ package com.naio.diagnostic.trames;
 
 import android.util.Log;
 
+import com.naio.diagnostic.packet.LidarPacket;
 import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.utils.Config;
 
@@ -45,6 +46,8 @@ public class TrameDecoder {
 			return new WatchdogTrame(pollFifo);
 		case Config.ID_ODO_PACKET :
 			return new OdometryPacket(pollFifo);
+		case Config.ID_LIDAR_PACKET :
+			return new LidarPacket(pollFifo);
 		default:
 			break;
 		}
