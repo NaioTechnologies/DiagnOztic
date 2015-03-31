@@ -1,0 +1,41 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="IDs" >
+        <EditTextPreference
+            android:defaultValue="1"
+            android:key="id_motors"
+            android:summary="Set the motors packet id"
+            android:title="Motor packet ID" />
+        <EditTextPreference
+            android:defaultValue="2"
+            android:key="id_log"
+            android:summary="Set the log packet id"
+            android:title="Log packet ID" />
+        <EditTextPreference
+            android:defaultValue="4"
+            android:key="id_gps"
+            android:summary="Set the gps packet id"
+            android:title="Gps packet id" />
+        <EditTextPreference
+            android:defaultValue="15"
+            android:key="id_actuator"
+            android:summary="Set the actuator packet id"
+            android:title="Actuator packet id" />
+        <EditTextPreference
+            android:defaultValue="18"
+            android:key="id_odo_packet"
+            android:summary="Set the odo packet id"
+            android:title="Odo packet ID" />
+        <EditTextPreference
+            android:defaultValue="19"
+            android:key="id_lidar_packet"
+            android:summary="Set the lidar packet id"
+            android:title="Lidar packet ID" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Back" >
+        <Preference
+            android:key="back_id"
+            android:title="Retour" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

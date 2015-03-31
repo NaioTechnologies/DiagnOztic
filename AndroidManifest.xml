@@ -34,6 +34,7 @@
         android:icon="@drawable/logo_diagnostic"
         android:theme="@style/AppTheme" >
         <uses-library android:name="android.test.runner" />
+
         <activity
             android:name="com.naio.diagnostic.activities.LidarGPSMotorsActivity"
             android:screenOrientation="landscape" >
@@ -58,6 +59,10 @@
         </activity>
         <activity
             android:name="com.naio.diagnostic.activities.DecisionIAActivity"
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name="com.naio.diagnostic.activities.PreferencesActivity"
             android:screenOrientation="landscape" >
         </activity>
 
