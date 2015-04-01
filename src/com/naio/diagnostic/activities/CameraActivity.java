@@ -15,9 +15,11 @@ import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.Config;
 import com.naio.diagnostic.utils.DataManager;
 import com.naio.diagnostic.utils.NewMemoryBuffer;
+import com.naio.diagnostic.utils.TextureHelper;
 import com.naio.opengl.CircleMesh;
 import com.naio.opengl.OpenGLRenderer;
 import com.naio.opengl.SimplePlane;
+import com.naio.opengl.TextureRenderer;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -81,7 +83,7 @@ public class CameraActivity extends FragmentActivity {
 
 	private SimplePlane plane;
 
-	private OpenGLRenderer renderer;
+	private TextureRenderer renderer;
 
 	private ArrayList<float[]> arrayPoints3d = new ArrayList<float[]>();
 
@@ -114,7 +116,8 @@ public class CameraActivity extends FragmentActivity {
 		GLSurfaceView view = (GLSurfaceView) findViewById(R.id.opengl_view);//new GLSurfaceView(this);
 
 		// Creating and attaching the renderer.
-		renderer = new OpenGLRenderer();
+		renderer = new TextureRenderer(this);
+		view.setEGLContextClientVersion(2);
 		view.setRenderer(renderer);
 		txt_opengl = (TextView)findViewById(R.id.text_image);
 		stop_the_handler= false;
@@ -235,21 +238,7 @@ public class CameraActivity extends FragmentActivity {
 			}
 		});
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		// Create a new plane.
-		plane = new SimplePlane(1, 1);
-		plane.sx = scaleX;
-		plane.sy = scaleY;
-		plane.z = 0.0f;
 
-		rapScaleX = scaleX / 2.5f;
-		rapScaleY = scaleY / 2.5f;
-
-		// Load the texture.
-		plane.loadBitmap(BitmapFactory.decodeResource(getResources(),
-				R.drawable.fleche));
-
-		// Add the plane to the renderer.
-		renderer.addMesh(plane);
 		getSupportFragmentManager().addOnBackStackChangedListener(
 				new OnBackStackChangedListener() {
 					public void onBackStackChanged() {
@@ -353,7 +342,8 @@ public class CameraActivity extends FragmentActivity {
 	}
 
 	private void display_image() {
-
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inScaled = false;
 		OdometryPacket odoPacket = (OdometryPacket) trameDecoder
 				.decode(memoryBufferLog.getPollFifo());
 		if (odoPacket == null)
@@ -364,17 +354,20 @@ public class CameraActivity extends FragmentActivity {
 		if (dataf == null)
 			return;
 		Bitmap bm;
-		bm = BitmapFactory.decodeByteArray(dataf, 0, dataf.length);
+		bm = BitmapFactory.decodeByteArray(dataf, 0, dataf.length,options);
 		if (bm == null)
 			return;
 		if (odoPacket.getPointtrame() == null) {
-			plane.loadBitmap(bm);
+			
+			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
+					bm));
 			return;
 		}
 		ArrayList<float[]> dataPoints3d = odoPacket.getPointtrame()
 				.getArrayListPoints3DFloat();
 		if (dataPoints3d == null) {
-			plane.loadBitmap(bm);
+			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
+					bm));
 			return;
 		}
 		Bitmap mutableBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
@@ -409,13 +402,15 @@ public class CameraActivity extends FragmentActivity {
 		}
 		
 		if(odoPacket.getLinetrame() == null){
-			plane.loadBitmap(bm);
+			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
+					mutableBitmap));
 			return;
 		}
 		ArrayList<float[]> dataLines3d = odoPacket.getLinetrame()
 				.getArrayListLines3DFloat();
 		if (dataLines3d == null) {
-			plane.loadBitmap(bm);
+			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
+					mutableBitmap));
 			return;
 		}
 		for (int i = 0; i < dataLines3d.size(); i++) {
@@ -449,7 +444,8 @@ public class CameraActivity extends FragmentActivity {
 			 * arrayPoints3d.remove(j); } }
 			 */
 		}
-		plane.loadBitmap(mutableBitmap);
+		renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
+				mutableBitmap));
 		if (odoPacket.getStringtrame() == null)
 			return;
 		String test = odoPacket.getStringtrame().getText();

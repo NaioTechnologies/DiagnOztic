@@ -65,6 +65,10 @@
             android:name="com.naio.diagnostic.activities.PreferencesActivity"
             android:screenOrientation="landscape" >
         </activity>
+        <activity
+            android:name="com.naio.diagnostic.activities.TestNewTextureActivity"
+            android:screenOrientation="landscape" >
+        </activity>
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
