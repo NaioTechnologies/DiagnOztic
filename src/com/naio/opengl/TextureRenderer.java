@@ -8,6 +8,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.naio.diagnostic.R;
+import com.naio.diagnostic.utils.DataManager;
 import com.naio.diagnostic.utils.ShaderHelper;
 import com.naio.diagnostic.utils.TextureHelper;
 
@@ -132,12 +133,22 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 	/** This is a handle to our texture data. */
 	private int mTextureDataHandle;
 
+	private int idx = 0;
+
+	private long endTime;
+
+	private long dt;
+
+	private long startTime;
+
+	private static final Object lock = new Object();
+
 	/**
 	 * Initialize the model data.
 	 */
 	public TextureRenderer(final Context activityContext) {
 		mActivityContext = activityContext;
-
+		startTime = System.currentTimeMillis();
 		// Define points for a cube.
 
 		// X, Y, Z
@@ -152,8 +163,12 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 				// visible anyways.
 
 				// Front face
-				-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
-				-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+				-1.0f, 1.0f, 1.0f,
+				-1.0f, -1.0f, 1.0f,
+				1.0f, 1.0f, 1.0f,
+				-1.0f,-1.0f, 1.0f,
+				1.0f, -1.0f, 1.0f,
+				1.0f, 1.0f, 1.0f
 
 		};
 
@@ -162,10 +177,10 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 				// Front face 
 				1.0f, 1.0f, 1.0f, 0.0f,
 				1.0f, 1.0f, 1.0f, 0.0f, 
-				1.0f, 1.0f,1.0f, 0.0f, 
+				1.0f, 1.0f, 1.0f, 0.0f, 
 				1.0f, 1.0f, 1.0f, 0.0f,
 				1.0f, 1.0f,	1.0f, 0.0f,
-				1.0f,1.0f, 1.0f, 0.0f,
+				1.0f,1.0f,  1.0f, 0.0f
 
 		};
 
@@ -175,8 +190,12 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 		// should be orthogonal to the points of each face.
 		final float[] cubeNormalData = {
 				// Front face
-				0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-				0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f
 
 		};
 
@@ -190,8 +209,12 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 		// face.
 		final float[] cubeTextureCoordinateData = {
 				// Front face
-				0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-				1.0f, 0.0f, };
+				0.0f, 0.0f, 
+				0.0f, 1.0f,
+				1.0f, 0.0f, 
+				0.0f, 1.0f,
+				1.0f, 1.0f, 
+				1.0f, 0.0f };
 
 		// Initialize the buffers.
 		mCubePositions = ByteBuffer
@@ -229,7 +252,7 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
 		// Set the background clear color to black.
-		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		GLES20.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
 		// Use culling to remove back faces.
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -304,7 +327,10 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 	 * @param mTextureDataHandle the mTextureDataHandle to set
 	 */
 	public void setmTextureDataHandle(int mTextureDataHandle) {
+		synchronized (lock) {
+			
 		this.mTextureDataHandle = mTextureDataHandle;
+		}
 	}
 
 	@Override
@@ -329,6 +355,19 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
+		
+		 endTime = System.currentTimeMillis();
+		    dt = endTime - startTime;
+		    if (dt < 100){
+				try {
+					Thread.sleep(100 - dt);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    }
+		    startTime = System.currentTimeMillis();
+		    
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		// Set our per-vertex lighting program.
@@ -353,9 +392,12 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 		// Set the active texture unit to texture unit 0.
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
+		synchronized (lock) {
 		// Bind the texture to this unit.
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureDataHandle);
-
+			setmTextureDataHandle(TextureHelper.loadTextureBitmap(null, DataManager.getInstance().getPollFifoBitmap()));
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureDataHandle);
+		}
+		
 		// Tell the texture uniform sampler to use this texture in the shader by
 		// binding to texture unit 0.
 		GLES20.glUniform1i(mTextureUniformHandle, 0);
@@ -372,33 +414,10 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 		Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0,
 				mLightPosInWorldSpace, 0);
 
-		// Draw some cubes.
-		/*
-		 * Matrix.setIdentityM(mModelMatrix, 0); Matrix.translateM(mModelMatrix,
-		 * 0, 4.0f, 0.0f, -7.0f); Matrix.rotateM(mModelMatrix, 0,
-		 * angleInDegrees, 1.0f, 0.0f, 0.0f); drawCube();
-		 */
-
-		/*
-		 * Matrix.setIdentityM(mModelMatrix, 0); Matrix.translateM(mModelMatrix,
-		 * 0, -4.0f, 0.0f, -7.0f); Matrix.rotateM(mModelMatrix, 0,
-		 * angleInDegrees, 0.0f, 1.0f, 0.0f); drawCube();
-		 */
-
-		/*
-		 * Matrix.setIdentityM(mModelMatrix, 0); Matrix.translateM(mModelMatrix,
-		 * 0, 0.0f, 4.0f, -7.0f); Matrix.rotateM(mModelMatrix, 0,
-		 * angleInDegrees, 0.0f, 0.0f, 1.0f); drawCube();
-		 */
-
-		/*
-		 * Matrix.setIdentityM(mModelMatrix, 0); Matrix.translateM(mModelMatrix,
-		 * 0, 0.0f, -4.0f, -7.0f); drawCube();
-		 */
-
 		Matrix.setIdentityM(mModelMatrix, 0);
 		Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -5.0f);
 		Matrix.translateM(mModelMatrix,0,0.0f, 0.0f, scale);
+		Matrix.scaleM(mModelMatrix,0,1.56f,1.0f,1.0f);
 		Matrix.rotateM(mModelMatrix,0,mDeltaX, 1.0f, 0.0f, 0.0f);
 		Matrix.rotateM(mModelMatrix, 0,mDeltaY, 0.0f, 1.0f, 0.0f);
 		// Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 1.0f, 0.0f);
@@ -463,7 +482,7 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 				mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
 
 		// Draw the cube.
-		GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
+		GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
 	}
 	
 	/**

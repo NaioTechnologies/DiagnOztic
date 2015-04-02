@@ -95,14 +95,10 @@ public class CameraActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
+		getActionBar().setBackgroundDrawable(
+				getResources().getDrawable(R.drawable.form));
 		arrayPoints = new ArrayList<float[]>();
 		arrayPoints3d = new ArrayList<float[]>();
-		// change the color of the action bar
-		/*
-		 * getActionBar().setBackgroundDrawable(
-		 * getResources().getDrawable(R.drawable.form));
-		 */
 		// Remove the title bar from the window.
 
 		// Make the windows into full screen mode.
@@ -206,8 +202,8 @@ public class CameraActivity extends FragmentActivity {
 								float scale = newDist / oldDist;
 								Log.e("agabb", "--" + scale);
 								renderer.scale += (scale - 1) / 10;
-								if (renderer.scale >= 3.8f) {
-									renderer.scale = 3.8f;
+								if (renderer.scale >= 2.2f) {
+									renderer.scale = 2.2f;
 								}
 							}
 
@@ -342,8 +338,8 @@ public class CameraActivity extends FragmentActivity {
 	}
 
 	private void display_image() {
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inScaled = false;
+		/*final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inScaled = false;*/
 		OdometryPacket odoPacket = (OdometryPacket) trameDecoder
 				.decode(memoryBufferLog.getPollFifo());
 		if (odoPacket == null)
@@ -354,20 +350,17 @@ public class CameraActivity extends FragmentActivity {
 		if (dataf == null)
 			return;
 		Bitmap bm;
-		bm = BitmapFactory.decodeByteArray(dataf, 0, dataf.length,options);
+		bm = BitmapFactory.decodeByteArray(dataf, 0, dataf.length);
 		if (bm == null)
 			return;
 		if (odoPacket.getPointtrame() == null) {
-			
-			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
-					bm));
+			DataManager.getInstance().fifoBitmap.offer(bm);
 			return;
 		}
 		ArrayList<float[]> dataPoints3d = odoPacket.getPointtrame()
 				.getArrayListPoints3DFloat();
 		if (dataPoints3d == null) {
-			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
-					bm));
+			DataManager.getInstance().fifoBitmap.offer(bm);
 			return;
 		}
 		Bitmap mutableBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
@@ -402,15 +395,13 @@ public class CameraActivity extends FragmentActivity {
 		}
 		
 		if(odoPacket.getLinetrame() == null){
-			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
-					mutableBitmap));
+			DataManager.getInstance().fifoBitmap.offer(mutableBitmap);
 			return;
 		}
 		ArrayList<float[]> dataLines3d = odoPacket.getLinetrame()
 				.getArrayListLines3DFloat();
 		if (dataLines3d == null) {
-			renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
-					mutableBitmap));
+			DataManager.getInstance().fifoBitmap.offer(mutableBitmap);
 			return;
 		}
 		for (int i = 0; i < dataLines3d.size(); i++) {
@@ -444,8 +435,7 @@ public class CameraActivity extends FragmentActivity {
 			 * arrayPoints3d.remove(j); } }
 			 */
 		}
-		renderer.setmTextureDataHandle(TextureHelper.loadTextureBitmap(this,
-				mutableBitmap));
+		DataManager.getInstance().fifoBitmap.offer(mutableBitmap);
 		if (odoPacket.getStringtrame() == null)
 			return;
 		String test = odoPacket.getStringtrame().getText();
