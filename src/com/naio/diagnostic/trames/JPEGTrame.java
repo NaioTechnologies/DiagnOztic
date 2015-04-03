@@ -20,5 +20,11 @@ public class JPEGTrame extends Trame {
 	public byte[] getImgData() {
 		return imgData;
 	}
+	public void setBytes(byte[] copyOfRange) {
+		if (copyOfRange.length > 0) {
+			imgData = copyOfRange;
+		}
+		
+	}
 	
 }

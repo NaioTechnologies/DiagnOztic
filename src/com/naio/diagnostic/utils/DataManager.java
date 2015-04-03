@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,17 +17,19 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 public class DataManager {
+	public static final Object lock = new Object();
 	private String points_position_oz;
 	private String metre_parcouru;
 	private String nombre_choux;
 	public ConcurrentLinkedQueue<byte[]> fifoImage = new ConcurrentLinkedQueue<byte[]>();
-	public ConcurrentLinkedQueue<ArrayList<float[][]>> fifoLines = new ConcurrentLinkedQueue<ArrayList<float[][]>>();
+	private ConcurrentLinkedQueue<ArrayList<float[][]>> fifoLines = new ConcurrentLinkedQueue<ArrayList<float[][]>>();
 
 	// the first float[] contains the width and the height of the images
-	public ConcurrentLinkedQueue<ArrayList<float[]>> fifoPoints2D = new ConcurrentLinkedQueue<ArrayList<float[]>>();
+	private ConcurrentLinkedQueue<ArrayList<float[]>> fifoPoints2D = new ConcurrentLinkedQueue<ArrayList<float[]>>();
 	private SimpleDateFormat sdf;
-	public ConcurrentLinkedQueue<ArrayList<float[]>> fifoPoints3D = new ConcurrentLinkedQueue<ArrayList<float[]>>();
-	public ConcurrentLinkedQueue<Bitmap> fifoBitmap = new ConcurrentLinkedQueue<Bitmap>();
+	private ConcurrentLinkedQueue<ArrayList<float[]>> fifoPoints3D = new ConcurrentLinkedQueue<ArrayList<float[]>>();
+	private ConcurrentLinkedQueue<Bitmap> fifoBitmap = new ConcurrentLinkedQueue<Bitmap>();
+	private ByteBuffer buffer;
 
 	private static DataManager instance;
 
@@ -40,7 +43,7 @@ public class DataManager {
 	private DataManager() {
 		super();
 		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
+		buffer = ByteBuffer.allocate(Config.BUFFER_SIZE);
 		points_position_oz = "";
 		metre_parcouru = "";
 		fifoImage = new ConcurrentLinkedQueue<byte[]>();
@@ -49,7 +52,9 @@ public class DataManager {
 		fifoPoints3D = new ConcurrentLinkedQueue<ArrayList<float[]>>();
 		fifoBitmap = new ConcurrentLinkedQueue<Bitmap>();
 	}
-
+public ByteBuffer getBuffer(){
+	return buffer;
+}
 	public void write_in_file(Context ctx) {
 		File gpxfile = new File(ctx.getFilesDir(), Config.FILE_SAVE_GPS);
 		Date date = new Date();
@@ -159,33 +164,69 @@ public class DataManager {
 
 	public ArrayList<float[][]> getPollFifoLines() {
 		for (int i = 0; i < fifoLines.size() - 1; i++) {
-			fifoLines.poll();
+			fifoLines.poll().clear();
 		}
 		return fifoLines.peek();
 	}
 
 	public ArrayList<float[]> getPollFifoPoints2D() {
 		for (int i = 0; i < fifoPoints2D.size() - 1; i++) {
-			fifoPoints2D.poll();
+			fifoPoints2D.poll().clear();
 		}
 		return fifoPoints2D.peek();
 	}
 
 	public ArrayList<float[]> getPollFifoPoints3D() {
 		for (int i = 0; i < fifoPoints3D.size() - 1; i++) {
-			fifoPoints3D.poll();
+			fifoPoints3D.poll().clear();
 		}
 		return fifoPoints3D.peek();
 	}
 
 	public Bitmap getPollFifoBitmap() {
+	
+			
+		
 		Bitmap ancienBitmap = null;
 		for (int i = 0; i < fifoBitmap.size() - 1; i++) {
-			if (ancienBitmap != null)
+			if (ancienBitmap != null){
 				ancienBitmap.recycle();
+				ancienBitmap = null;}
 			ancienBitmap = fifoBitmap.poll();
 		}
 		return fifoBitmap.peek();
+		
+	}
+
+	public void offerfifoBitmap(Bitmap mutableBitmap) {
+		synchronized (lock) {
+		fifoBitmap.offer(mutableBitmap);
+		for (int i = 0; i < fifoBitmap.size() - 1; i++) {
+			Bitmap b = fifoBitmap.poll(); b.recycle(); b = null;
+		}
+		lock.notifyAll();
+		}
+	}
+	
+	public void offerfifoLines(ArrayList<float[][]> lines) {
+		fifoLines.offer(lines);
+		for (int i = 0; i < fifoLines.size() - 1; i++) {
+			ArrayList<float[][]> l = fifoLines.poll(); l.clear(); l = null;
+		}
+	}
+	
+	public void offerfifoPoints3D(ArrayList<float[]> points) {
+		fifoPoints3D.offer(points);
+		for (int i = 0; i < fifoPoints3D.size() - 1; i++) {
+			ArrayList<float[]> p = fifoPoints3D.poll(); p.clear(); p = null;
+		}
+	}
+
+	public void offerfifoPoints2D(ArrayList<float[]> arrayListPoints2D) {
+		fifoPoints2D.offer(arrayListPoints2D);
+		for (int i = 0; i < fifoPoints2D.size() - 1; i++) {
+			fifoPoints2D.poll().clear();
+		}
 	}
 
 }

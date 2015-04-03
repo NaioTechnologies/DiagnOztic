@@ -94,6 +94,7 @@ public class NetClient {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		buff.clear();
 		return harRead > -1;
 	}
 

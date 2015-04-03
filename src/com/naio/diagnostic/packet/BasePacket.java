@@ -15,4 +15,8 @@ public class BasePacket extends Trame{
 		
 	}
 
+	public BasePacket() {
+		super();
+	}
+
 }

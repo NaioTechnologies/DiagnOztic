@@ -25,13 +25,13 @@ public class LidarPacket extends BasePacket{
 			case POINTS:
 				offset++;
 				int nbrPoints = ByteBuffer.wrap(new byte[]{data[offset+2],data[offset+3],data[offset+4],data[offset+5]}).getInt(0);
-				pointtrame = new PointTrame(Arrays.copyOfRange(data,offset,offset+nbrPoints*Config.POINTS3D_SIZE_IN_BYTES + 6));
+				pointtrame = new PointTrame(data,offset);
 				offset+=nbrPoints*Config.POINTS3D_SIZE_IN_BYTES + 6;
 				break;
 			case LINES:
 				offset++;
 				int nbrLines = ByteBuffer.wrap(new byte[]{data[offset+2],data[offset+3],data[offset+4],data[offset+5]}).getInt(0);
-				linetrame = new LigneTrame(Arrays.copyOfRange(data,offset,offset+nbrLines*Config.POINTS3D_SIZE_IN_BYTES*2 + 6));
+				linetrame = new LigneTrame(data,offset);
 				offset+=nbrLines*Config.POINTS3D_SIZE_IN_BYTES*2 + 6;
 				break;
 			case STRING:

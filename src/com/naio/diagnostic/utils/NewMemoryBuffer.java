@@ -20,8 +20,6 @@ import net.sourceforge.juint.Int32;
 public class NewMemoryBuffer {
 	public ConcurrentLinkedQueue<byte[]> fifo = new ConcurrentLinkedQueue<byte[]>();
 
-	private byte[] memoryBytes = new byte[] {};
-
 	private int payloadSize;
 
 	private int CurrentBufferPos;
@@ -30,14 +28,15 @@ public class NewMemoryBuffer {
 	private int CurrentMaxPacketSize;
 
 	private int CurrentPacketSize;
+	public final Object lock = new Object();
 
 	public NewMemoryBuffer() {
 		CurrentBufferPos = 0;
-		WorkingBuffer = new byte[1024 * 1024 * 3];
+		WorkingBuffer = new byte[5000000];
 		CurrentPacketSize = 0;
 	}
 
-	public void addToFifo(byte[] bytes, int bytesRead, int offset) {
+	public void addToFifo(final byte[] bytes, final int bytesRead, final int offset) {
 		
 		//byte[] bytes = bytess.clone();
 		try {
@@ -63,6 +62,8 @@ public class NewMemoryBuffer {
 					// NOTHING
 					byte packetId = GetPacketId(0, this.WorkingBuffer);
 					this.CurrentMaxPacketSize = GetMaxPacketLength(packetId);
+					if(CurrentMaxPacketSize == 0)
+						this.CurrentBufferPos = -1;
 				}
 				//
 				else if (this.CurrentBufferPos == 11) {
@@ -84,8 +85,9 @@ public class NewMemoryBuffer {
 						+ this.CurrentPacketSize + Config.LENGHT_CHECKSUM -1) {
 				/*	Log.e("sizeTot",""+(Config.LENGHT_FULL_HEADER
 							+ this.CurrentPacketSize + Config.LENGHT_CHECKSUM )+ "----"+this.CurrentPacketSize);*/
-					fifo.offer(Arrays.copyOfRange(this.WorkingBuffer, 0,
+					offer(Arrays.copyOfRange(this.WorkingBuffer, 0,
 							this.CurrentBufferPos));
+					Log.e("fghjk","just offer "+this.CurrentBufferPos);
 					//DataManager.getInstance().write_in_log("paquet finish : "+ this.CurrentBufferPos);
 					this.CurrentBufferPos = -1;
 				}
@@ -98,9 +100,22 @@ public class NewMemoryBuffer {
 		}
 	}
 
+	private void offer(byte[] copyOfRange) {
+		synchronized (lock) {
+			
+		
+		for (int i = 0; i < fifo.size() - 2; i++) {
+			byte[] n = fifo.poll(); n = null;
+		}
+		System.gc();
+		fifo.offer(copyOfRange);
+		lock.notify();
+		}
+	}
+
 	public byte[] getPollFifo() {
-		for (int i = 0; i < fifo.size() - 1; i++) {
-			fifo.poll();
+		for (int i = 0; i < fifo.size() - 2; i++) {
+			byte[] n = fifo.poll();n = null;
 		}
 		return fifo.peek();
 	}
@@ -113,13 +128,13 @@ public class NewMemoryBuffer {
 			maxPacketLenght = 2;
 			break;
 		case (byte) Config.ID_LOG:
-			maxPacketLenght = 500000000;
+			maxPacketLenght = 12308452;
 			break;
 		case (byte) Config.ID_ODO:
 			maxPacketLenght = 4;
 			break;
 		case (byte) Config.ID_ODO_PACKET:
-			maxPacketLenght = 500000000;
+			maxPacketLenght = 10000000;
 			break;
 		/*
 		 * case (byte)PacketIds.WatchDogPacketId: maxPacketLenght = (uint)32;
@@ -195,14 +210,6 @@ public class NewMemoryBuffer {
 		}
 
 		return false;
-	}
-
-	public byte[] getPollAntepenultiemeFifo() {
-	
-		for (int i = 0; i < fifo.size() - 2; i++) {
-			fifo.poll();
-		}
-		return fifo.peek();
 	}
 
 }

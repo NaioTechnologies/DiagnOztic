@@ -278,7 +278,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 					latlng);
 
 			mapView.getOverlays().clear();
-			listPointMapView.add(latlng);
+			// listPointMapView.add(latlng);
 			RoadManager roadManager = new OSRMRoadManager();
 			ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
 			items.add(myLocationOverlayItem);
@@ -301,9 +301,13 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 				mapView.getController().setCenter(latlng);
 				firstTimeDisplayTheMap = false;
 			}
-			Road road = roadManager.getRoad(listPointMapView);
-			Polyline roadOverlay = RoadManager.buildRoadOverlay(road, this);
-			mapView.getOverlays().add(roadOverlay);
+			// TODO : on affiche vraiment la road ? Plus ça avance et plus elle
+			// devient longue à afficher et ça fait tout ramer
+			/*
+			 * Road road = roadManager.getRoad(listPointMapView); Polyline
+			 * roadOverlay = RoadManager.buildRoadOverlay(road, this);
+			 * mapView.getOverlays().add(roadOverlay);
+			 */
 			mapView.invalidate();
 		}
 	}

@@ -20,6 +20,10 @@ public class Trame {
 		
 	}
 	
+	public Trame() {
+		
+	}
+
 	/**
 	 * @return the naio01
 	 */

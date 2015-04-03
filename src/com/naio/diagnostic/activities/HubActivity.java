@@ -41,6 +41,7 @@ public class HubActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.e("stopcdvfbghjkl"," on back pressed");
 		Config.setPreferencesSettings(this);
 	}
 	@Override

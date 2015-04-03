@@ -7,6 +7,15 @@ import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.utils.Config;
 
 public class TrameDecoder {
+	
+	private LogTrame logTrame;
+	private OdometryPacket odometryPacket;
+
+	public TrameDecoder(){
+		super();
+		logTrame = new LogTrame();
+		odometryPacket = new OdometryPacket();
+	}
 
 	public Trame decode(byte[] pollFifo) {
 		
@@ -25,7 +34,7 @@ public class TrameDecoder {
 		case Config.ID_GYRO:
 			return new GyroTrame(pollFifo);
 		case Config.ID_LOG:
-			return new LogTrame(pollFifo);
+			return  logTrame.setBytes(pollFifo);
 		case Config.ID_ODO:
 			return new OdoTrame(pollFifo);
 		case Config.ID_MOTORS:
@@ -45,7 +54,7 @@ public class TrameDecoder {
 		case Config.ID_WATCHDOG :
 			return new WatchdogTrame(pollFifo);
 		case Config.ID_ODO_PACKET :
-			return new OdometryPacket(pollFifo);
+			return odometryPacket.setBytes(pollFifo);
 		case Config.ID_LIDAR_PACKET :
 			return new LidarPacket(pollFifo);
 		default:

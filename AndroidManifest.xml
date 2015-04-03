@@ -32,7 +32,8 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/logo_diagnostic"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:largeHeap="true" >
         <uses-library android:name="android.test.runner" />
 
         <activity

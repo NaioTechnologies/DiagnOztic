@@ -356,17 +356,16 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		
-		 endTime = System.currentTimeMillis();
-		    dt = endTime - startTime;
-		    if (dt < 100){
-				try {
-					Thread.sleep(100 - dt);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		    }
-		    startTime = System.currentTimeMillis();
+		/*endTime = System.currentTimeMillis();
+	    dt = endTime - startTime;
+		if (dt < 10){
+			try {
+				Thread.sleep(10 - dt);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		startTime = System.currentTimeMillis();*/
 		    
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
@@ -392,11 +391,19 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 		// Set the active texture unit to texture unit 0.
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-		synchronized (lock) {
+		synchronized (DataManager.lock) {
 		// Bind the texture to this unit.
-			setmTextureDataHandle(TextureHelper.loadTextureBitmap(null, DataManager.getInstance().getPollFifoBitmap()));
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureDataHandle);
+			
+			try {
+				DataManager.lock.wait(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if(DataManager.getInstance().getPollFifoBitmap() != null)
+				setmTextureDataHandle(TextureHelper.loadTextureBitmap(null, DataManager.getInstance().getPollFifoBitmap()));
+			
 		}
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureDataHandle);
 		
 		// Tell the texture uniform sampler to use this texture in the shader by
 		// binding to texture unit 0.
