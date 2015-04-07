@@ -17,6 +17,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.Matrix;
+import android.util.Log;
 
 public class TextureRenderer implements GLSurfaceView.Renderer {
 	/** Used for debug logs. */
@@ -395,10 +396,11 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 		// Bind the texture to this unit.
 			
 			try {
-				DataManager.lock.wait(100);
+				DataManager.lock.wait(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			Log.e("notify","get in opengl");
 			if(DataManager.getInstance().getPollFifoBitmap() != null)
 				setmTextureDataHandle(TextureHelper.loadTextureBitmap(null, DataManager.getInstance().getPollFifoBitmap()));
 			

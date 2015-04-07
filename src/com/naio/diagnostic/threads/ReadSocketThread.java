@@ -35,10 +35,11 @@ public class ReadSocketThread extends Thread {
 		this.newmemoryBuffer = memoryBuffer;
 		this.stop = true;
 	}
+	
 
 	public void run() {
 		int charsRead = 0;
-		
+
 		if (port == Config.PORT_LOG)
 			netClient = new NetClient(Config.HOST2, port, "0");
 		else
@@ -47,25 +48,30 @@ public class ReadSocketThread extends Thread {
 		try {
 			while (this.stop) {
 				if (netClient.socketChannel != null) {
-					if ((charsRead = netClient.socketChannel.read(DataManager.getInstance().getBuffer())) > -1) {
+					if ((charsRead = netClient.socketChannel.read(DataManager
+							.getInstance().getBuffer())) > -1) {
 
 						if (charsRead > 0) {
-							Log.e("charsRead",""+charsRead);
-							newmemoryBuffer.addToFifo(DataManager.getInstance().getBuffer().array(),
-									charsRead, DataManager.getInstance().getBuffer().arrayOffset());
+							Log.e("charsRead", "" + charsRead);
+							newmemoryBuffer.addToFifo(DataManager.getInstance()
+									.getBuffer().array(), charsRead,
+									DataManager.getInstance().getBuffer()
+											.arrayOffset());
 						}
 						DataManager.getInstance().getBuffer().clear();
 						if (!netClient.testConnection()) {
 							netClient.disConnectWithServer();
 							stop = false;
 						}
-						
+
 					} else {
 						Log.e("states", "close");
 						if (!netClient.testConnection()) {
 							netClient.disConnectWithServer();
 							stop = false;
 						}
+						
+
 					}
 				} else {
 					if (!netClient.testConnection()) {
@@ -73,18 +79,16 @@ public class ReadSocketThread extends Thread {
 						stop = false;
 					}
 					// Log.e("socket", "pas de in");
-					/*
-					 * try { Thread.sleep(1, 10); } catch (InterruptedException
-					 * e) {
-					 * 
-					 * e.printStackTrace(); }
-					 */
+
+	
+
 				}
 			}
 		} catch (IOException e) {
 
 			e.printStackTrace();
 		}
+		netClient.disConnectWithServer();
 
 	}
 

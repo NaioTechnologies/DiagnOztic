@@ -32,23 +32,26 @@ public class NewMemoryBuffer {
 
 	public NewMemoryBuffer() {
 		CurrentBufferPos = 0;
-		WorkingBuffer = new byte[5000000];
+		WorkingBuffer = new byte[752*480*3*2];
 		CurrentPacketSize = 0;
 	}
 
-	public void addToFifo(final byte[] bytes, final int bytesRead, final int offset) {
-		
-		//byte[] bytes = bytess.clone();
+	public void addToFifo(final byte[] bytes, final int bytesRead,
+			final int offset) {
+
+		// byte[] bytes = bytess.clone();
 		try {
 			int idx = 0;
-			
+
 			while (idx < bytesRead) {
-				this.WorkingBuffer[this.CurrentBufferPos] = bytes[offset+idx];
-				//Log.e("index",""+idx + "  read:"+bytesRead);
+				this.WorkingBuffer[this.CurrentBufferPos] = bytes[offset + idx];
+				// Log.e("index",""+idx + "  read:"+bytesRead);
 				// TEST PROTOCOL VERSION
 				if (this.CurrentBufferPos == 5) {
-					//Log.e("sizeTot","--"+this.WorkingBuffer[0]+"--"+this.WorkingBuffer[1]+"--"+this.WorkingBuffer[2]+"--"+this.WorkingBuffer[3]+"--"+this.WorkingBuffer[4]+"--"+this.WorkingBuffer[5]+"--"+this.WorkingBuffer[6]+"---"+this.WorkingBuffer[7]+"--" + this.WorkingBuffer[8]+"--"+this.WorkingBuffer[9]+"--"+this.WorkingBuffer[10]+"--"+this.WorkingBuffer[11]+"--"+this.WorkingBuffer[12]+"--"+this.WorkingBuffer[13]);
-					
+					// Log.e("sizeTot","--"+this.WorkingBuffer[0]+"--"+this.WorkingBuffer[1]+"--"+this.WorkingBuffer[2]+"--"+this.WorkingBuffer[3]+"--"+this.WorkingBuffer[4]+"--"+this.WorkingBuffer[5]+"--"+this.WorkingBuffer[6]+"---"+this.WorkingBuffer[7]+"--"
+					// +
+					// this.WorkingBuffer[8]+"--"+this.WorkingBuffer[9]+"--"+this.WorkingBuffer[10]+"--"+this.WorkingBuffer[11]+"--"+this.WorkingBuffer[12]+"--"+this.WorkingBuffer[13]);
+
 					if (!ValidateProtocol(0, this.WorkingBuffer)) {
 						for (int shiftIdx = 0; shiftIdx <= this.CurrentBufferPos; shiftIdx++) {
 							this.WorkingBuffer[shiftIdx] = this.WorkingBuffer[shiftIdx + 1];
@@ -62,7 +65,7 @@ public class NewMemoryBuffer {
 					// NOTHING
 					byte packetId = GetPacketId(0, this.WorkingBuffer);
 					this.CurrentMaxPacketSize = GetMaxPacketLength(packetId);
-					if(CurrentMaxPacketSize == 0)
+					if (CurrentMaxPacketSize == 0)
 						this.CurrentBufferPos = -1;
 				}
 				//
@@ -71,10 +74,26 @@ public class NewMemoryBuffer {
 							this.WorkingBuffer[8], this.WorkingBuffer[9],
 							this.WorkingBuffer[10] };
 					this.CurrentPacketSize = ByteBuffer.wrap(size).getInt();
-					/*this.WorkingBuffer[12]=0x1;
-					this.WorkingBuffer[13]=0x2;*/
-					Log.e("sizeTot",""+this.CurrentPacketSize + "and the fucking bytes :"+"--"+this.WorkingBuffer[0]+"--"+this.WorkingBuffer[1]+"--"+this.WorkingBuffer[2]+"--"+this.WorkingBuffer[3]+"--"+this.WorkingBuffer[4]+"--"+this.WorkingBuffer[5]+"--"+this.WorkingBuffer[6]+"---"+this.WorkingBuffer[7]+"--" + this.WorkingBuffer[8]+"--"+this.WorkingBuffer[9]+"--"+this.WorkingBuffer[10]+"--"+this.WorkingBuffer[11]+"--"+this.WorkingBuffer[12]+"--"+this.WorkingBuffer[13]);
-					
+					/*
+					 * this.WorkingBuffer[12]=0x1; this.WorkingBuffer[13]=0x2;
+					 */
+					Log.e("sizeTot", "" + this.CurrentPacketSize
+							+ "and the fucking bytes :" + "--"
+							+ this.WorkingBuffer[0] + "--"
+							+ this.WorkingBuffer[1] + "--"
+							+ this.WorkingBuffer[2] + "--"
+							+ this.WorkingBuffer[3] + "--"
+							+ this.WorkingBuffer[4] + "--"
+							+ this.WorkingBuffer[5] + "--"
+							+ this.WorkingBuffer[6] + "---"
+							+ this.WorkingBuffer[7] + "--"
+							+ this.WorkingBuffer[8] + "--"
+							+ this.WorkingBuffer[9] + "--"
+							+ this.WorkingBuffer[10] + "--"
+							+ this.WorkingBuffer[11] + "--"
+							+ this.WorkingBuffer[12] + "--"
+							+ this.WorkingBuffer[13]);
+
 					// TODO:Trouble !!!!!!
 					if (this.CurrentPacketSize > this.CurrentMaxPacketSize) {
 						this.CurrentPacketSize = this.CurrentMaxPacketSize;
@@ -82,13 +101,18 @@ public class NewMemoryBuffer {
 				}
 				// ALL PACKET RECEIVED TRY TO DECODE
 				else if (this.CurrentBufferPos == Config.LENGHT_FULL_HEADER
-						+ this.CurrentPacketSize + Config.LENGHT_CHECKSUM -1) {
-				/*	Log.e("sizeTot",""+(Config.LENGHT_FULL_HEADER
-							+ this.CurrentPacketSize + Config.LENGHT_CHECKSUM )+ "----"+this.CurrentPacketSize);*/
-					offer(Arrays.copyOfRange(this.WorkingBuffer, 0,
-							this.CurrentBufferPos));
-					Log.e("fghjk","just offer "+this.CurrentBufferPos);
-					//DataManager.getInstance().write_in_log("paquet finish : "+ this.CurrentBufferPos);
+						+ this.CurrentPacketSize + Config.LENGHT_CHECKSUM - 1) {
+					/*
+					 * Log.e("sizeTot",""+(Config.LENGHT_FULL_HEADER +
+					 * this.CurrentPacketSize + Config.LENGHT_CHECKSUM )+
+					 * "----"+this.CurrentPacketSize);
+					 */
+					byte[] copy = new byte[this.CurrentBufferPos];
+					System.arraycopy(this.WorkingBuffer, 0, copy, 0, this.CurrentBufferPos-1);
+					offer(copy);
+					Log.e("fghjk", "just offer " + this.CurrentBufferPos);
+					// DataManager.getInstance().write_in_log("paquet finish : "+
+					// this.CurrentBufferPos);
 					this.CurrentBufferPos = -1;
 				}
 
@@ -102,20 +126,22 @@ public class NewMemoryBuffer {
 
 	private void offer(byte[] copyOfRange) {
 		synchronized (lock) {
-			
-		
-		for (int i = 0; i < fifo.size() - 2; i++) {
-			byte[] n = fifo.poll(); n = null;
-		}
-		System.gc();
-		fifo.offer(copyOfRange);
-		lock.notify();
+
+			for (int i = 0; i < fifo.size(); i++) {
+				byte[] n = fifo.poll();
+				n = null;
+			}
+			System.gc();
+			fifo.offer(copyOfRange);
+			lock.notifyAll();
+			Log.e("notify","thread notify an image and fifo size: "+ fifo.size());
 		}
 	}
 
 	public byte[] getPollFifo() {
-		for (int i = 0; i < fifo.size() - 2; i++) {
-			byte[] n = fifo.poll();n = null;
+		for (int i = 0; i < fifo.size()-1; i++) {
+			byte[] n = fifo.poll();
+			n = null;
 		}
 		return fifo.peek();
 	}
@@ -174,11 +200,11 @@ public class NewMemoryBuffer {
 
 	private static byte GetPacketId(int start, byte[] buffer) {
 		byte messageId = 0;
-		
+
 		if (buffer.length >= (7 + start)) {
 			messageId = buffer[6];
 		}
-		DataManager.getInstance().write_in_log("id du paquet : "+ messageId);
+		DataManager.getInstance().write_in_log("id du paquet : " + messageId);
 		return messageId;
 	}
 

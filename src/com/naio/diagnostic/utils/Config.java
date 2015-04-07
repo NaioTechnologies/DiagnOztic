@@ -70,7 +70,7 @@ public class Config {
 	public static  final int ID_ODO_PACKET = 18;
 	public static  final int ID_LIDAR_PACKET = 19;
 
-	public static   int BUFFER_SIZE = 2000000;
+	public static   int BUFFER_SIZE = 1024*1024;
 	
 	public static   String FILE_SAVE_GPS = "bilan.naio";
 

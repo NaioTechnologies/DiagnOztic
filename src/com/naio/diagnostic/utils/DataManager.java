@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 public class DataManager {
 	public static final Object lock = new Object();
@@ -52,9 +53,11 @@ public class DataManager {
 		fifoPoints3D = new ConcurrentLinkedQueue<ArrayList<float[]>>();
 		fifoBitmap = new ConcurrentLinkedQueue<Bitmap>();
 	}
-public ByteBuffer getBuffer(){
-	return buffer;
-}
+
+	public ByteBuffer getBuffer() {
+		return buffer;
+	}
+
 	public void write_in_file(Context ctx) {
 		File gpxfile = new File(ctx.getFilesDir(), Config.FILE_SAVE_GPS);
 		Date date = new Date();
@@ -184,41 +187,47 @@ public ByteBuffer getBuffer(){
 	}
 
 	public Bitmap getPollFifoBitmap() {
-	
-			
-		
+
 		Bitmap ancienBitmap = null;
 		for (int i = 0; i < fifoBitmap.size() - 1; i++) {
-			if (ancienBitmap != null){
-				ancienBitmap.recycle();
-				ancienBitmap = null;}
+			if (ancienBitmap != null) {
+
+				ancienBitmap = null;
+			}
 			ancienBitmap = fifoBitmap.poll();
 		}
 		return fifoBitmap.peek();
-		
+
 	}
 
 	public void offerfifoBitmap(Bitmap mutableBitmap) {
 		synchronized (lock) {
-		fifoBitmap.offer(mutableBitmap);
-		for (int i = 0; i < fifoBitmap.size() - 1; i++) {
-			Bitmap b = fifoBitmap.poll(); b.recycle(); b = null;
-		}
-		lock.notifyAll();
+			for (int i = 0; i < fifoBitmap.size(); i++) {
+				Bitmap b = fifoBitmap.poll();
+				b.recycle();
+				b = null;
+			}
+			fifoBitmap.offer(mutableBitmap);
+			lock.notifyAll();
+			Log.e("notify","offered");
 		}
 	}
-	
+
 	public void offerfifoLines(ArrayList<float[][]> lines) {
 		fifoLines.offer(lines);
 		for (int i = 0; i < fifoLines.size() - 1; i++) {
-			ArrayList<float[][]> l = fifoLines.poll(); l.clear(); l = null;
+			ArrayList<float[][]> l = fifoLines.poll();
+			l.clear();
+			l = null;
 		}
 	}
-	
+
 	public void offerfifoPoints3D(ArrayList<float[]> points) {
 		fifoPoints3D.offer(points);
 		for (int i = 0; i < fifoPoints3D.size() - 1; i++) {
-			ArrayList<float[]> p = fifoPoints3D.poll(); p.clear(); p = null;
+			ArrayList<float[]> p = fifoPoints3D.poll();
+			p.clear();
+			p = null;
 		}
 	}
 

@@ -4,8 +4,6 @@
     android:layout_height="match_parent"
     tools:context="com.naio.diagnostic.activities.CameraActivity" >
 
-   
-
     <ImageView
         android:id="@+id/imageview"
         android:layout_width="600px"
@@ -24,18 +22,18 @@
         android:layout_height="wrap_content"
         android:text="TextView" />
 
-     <android.opengl.GLSurfaceView
+    <android.opengl.GLSurfaceView
         android:id="@+id/opengl_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
-     
+
     <TextView
         android:id="@+id/text_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:textSize="20dp"
+        android:text=" "
         android:textColor="@color/wallet_holo_blue_light"
-        android:text=" " />
+        android:textSize="20dp" />
 
 </RelativeLayout>

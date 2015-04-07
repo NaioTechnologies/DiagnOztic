@@ -40,7 +40,6 @@ public class TextureHelper {
 		return textures[0];
 	}
 
-	@TargetApi(Build.VERSION_CODES.KITKAT)
 	public static int loadTextureBitmap(final Context context,
 			final Bitmap bitmap) {
 		// GLES20.glDeleteTextures(1, textures, 1);
@@ -49,7 +48,6 @@ public class TextureHelper {
 		if(bitmap == bitmapS)
 			return textures[0];
 		bitmapS = bitmap;
-		GLES20.glGenTextures(1, textures, 0);
 		if (textures[0] != 0) {
 			// Bind to the texture in OpenGL
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
@@ -59,9 +57,10 @@ public class TextureHelper {
 			GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
 					GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
 			// Load the bitmap into the bound texture.
-			Log.e("bitmap",""+bitmap.getAllocationByteCount());
 			if(!bitmap.isRecycled())
 				GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+			
+			
 			// Recycle the bitmap, since its data has been loaded into OpenGL.
 			// bitmap.recycle();
 

@@ -9,6 +9,7 @@ import org.osmdroid.ResourceProxy.bitmap;
 import com.naio.diagnostic.R;
 
 import com.naio.diagnostic.packet.OdometryPacket;
+import com.naio.diagnostic.threads.BitmapThread;
 import com.naio.diagnostic.threads.ReadSocketThread;
 
 import com.naio.diagnostic.trames.LogTrame;
@@ -59,7 +60,7 @@ import android.widget.TextView;
  * 
  */
 public class CameraActivity extends FragmentActivity {
-	private static final long MILLISECONDS_RUNNABLE = 1; // 64 for 15fps
+	private static final long MILLISECONDS_RUNNABLE = 0; // 64 for 15fps
 
 	private TrameDecoder trameDecoder;
 
@@ -99,6 +100,10 @@ public class CameraActivity extends FragmentActivity {
 
 	private byte[] oldPollFifo = null;
 
+	private BitmapThread bitmapThread;
+
+	private GLSurfaceView view;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -117,7 +122,7 @@ public class CameraActivity extends FragmentActivity {
 		// Create a OpenGL view.
 		// GLSurfaceView view = (GLSurfaceView) findViewById(R.id.opengl_view);
 		setContentView(R.layout.camera_activity);
-		GLSurfaceView view = (GLSurfaceView) findViewById(R.id.opengl_view);// new
+		view = (GLSurfaceView) findViewById(R.id.opengl_view);// new
 																			// GLSurfaceView(this);
 
 		// Creating and attaching the renderer.
@@ -300,10 +305,13 @@ public class CameraActivity extends FragmentActivity {
 			trameDecoder = new TrameDecoder();
 
 			memoryBufferLog = new NewMemoryBuffer();
-			// memoryBufferOdo = new NewMemoryBuffer();
 
+			// memoryBufferOdo = new NewMemoryBuffer();
 			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,
 					Config.PORT_LOG);
+			
+			bitmapThread = new BitmapThread(memoryBufferLog);
+
 			/*
 			 * readSocketThreadOdo = new ReadSocketThread(memoryBufferOdo,
 			 * Config.PORT_ODO);
@@ -314,9 +322,10 @@ public class CameraActivity extends FragmentActivity {
 					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 			readSocketThreadLog.start();
+			bitmapThread.start();
 			// readSocketThreadOdo.start();
 
-			handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+			//handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 		}
 	}
 
@@ -324,10 +333,13 @@ public class CameraActivity extends FragmentActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		// DataManager.getInstance().write_in_file(this);
-
 		readSocketThreadLog.setStop(false);
+		bitmapThread.quit();
+		//renderer = null;
+		view.onPause();
+		
 		// readSocketThreadOdo.setStop(false);
-		handler.removeCallbacks(runnable);
+		//handler.removeCallbacks(runnable);
 		stop_the_handler = true;
 
 	}
@@ -348,135 +360,22 @@ public class CameraActivity extends FragmentActivity {
 
 	}
 
-	@TargetApi(Build.VERSION_CODES.KITKAT)
 	private void display_image() {
-		/*
-		 * final BitmapFactory.Options options = new BitmapFactory.Options();
-		 * options.inScaled = false;
-		 */
-		synchronized (memoryBufferLog.lock) {
+		/*synchronized (bitmapThread.lock2) {
 			try {
-				memoryBufferLog.lock.wait(32);
+				bitmapThread.lock2.wait(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-			BitmapFactory.Options opt = new BitmapFactory.Options();
-			opt.inMutable = true;
-			opt.inPurgeable = true;
-			opt.inPreferredConfig = Bitmap.Config.RGB_565;
-			byte[] pollFifo = memoryBufferLog.getPollFifo();
-			if (oldPollFifo == pollFifo)
-				return;
-			oldPollFifo = pollFifo;
-			OdometryPacket odoPacket = (OdometryPacket) trameDecoder
-					.decode(memoryBufferLog.getPollFifo());
-
-			if (odoPacket == null)
-				return;
-			if (odoPacket.getJpegtrame() == null)
-				return;
-			if (odoPacket.getJpegtrame().getImgData() == null)
-				return;
-			Bitmap mutableBitmap;
-			System.gc();
-			byte[] dataf = odoPacket.getJpegtrame().getImgData();
-			mutableBitmap = BitmapFactory.decodeByteArray(dataf, 0,
-					dataf.length, opt);
-			dataf = null;
-			if (mutableBitmap == null)
-				return;
-			if (odoPacket.getPointtrame() == null) {
-				DataManager.getInstance().offerfifoBitmap(mutableBitmap);
-				return;
-			}
-			ArrayList<float[]> dataPoints3d = odoPacket.getPointtrame()
-					.getArrayListPoints3DFloat();
-			if (dataPoints3d == null) {
-				DataManager.getInstance().offerfifoBitmap(mutableBitmap);
-				return;
-			}
-
-			// Bitmap mutableBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
-			Log.e("bitmap", "" + mutableBitmap.getAllocationByteCount());
-			Canvas canvas = new Canvas(mutableBitmap);
-			Paint paint = new Paint();
-			for (int i = 0; i < dataPoints3d.size(); i++) {
-				float x = dataPoints3d.get(i)[0];
-				float y = dataPoints3d.get(i)[1];
-				float z = dataPoints3d.get(i)[2];
-
-				paint.setAntiAlias(true);
-				if (z <= 0)
-					paint.setColor(Color.BLUE);
-				if (z <= -1)
-					paint.setColor(Color.GREEN);
-				if (z <= -2)
-					paint.setColor(Color.YELLOW);
-				if (z >= 1)
-					paint.setColor(Color.RED);
-				if (z >= 2)
-					paint.setColor(Color.WHITE);
-				canvas.drawCircle(x - 1, y - 1, 6, paint);
-
-				/*
-				 * if (arrayPoints3d.size() <= i - 1) { arrayPoints3d.add(new
-				 * float[] { x, y }); } else { arrayPoints3d.get(i - 1)[0] = x;
-				 * arrayPoints3d.get(i - 1)[1] = y; } if (i - 1 <=
-				 * arrayPoints3d.size() && i == (dataPoints3d.size() - 1)) { int
-				 * s = arrayPoints3d.size(); for (int j = (i - 1); j < s; j++) {
-				 * arrayPoints3d.remove(j); } }
-				 */
-			}
-
-			if (odoPacket.getLinetrame() == null) {
-				DataManager.getInstance().offerfifoBitmap(mutableBitmap);
-				return;
-			}
-			ArrayList<float[]> dataLines3d = odoPacket.getLinetrame()
-					.getArrayListLines3DFloat();
-			if (dataLines3d == null) {
-				DataManager.getInstance().offerfifoBitmap(mutableBitmap);
-				return;
-			}
-
-			for (int i = 0; i < dataLines3d.size(); i++) {
-				float x = dataLines3d.get(i)[0];
-				float y = dataLines3d.get(i)[1];
-				float z = dataLines3d.get(i)[2];
-				float x2 = dataLines3d.get(i)[3];
-				float y2 = dataLines3d.get(i)[4];
-				float z2 = dataLines3d.get(i)[5];
-
-				paint.setAntiAlias(true);
-				if (z <= 0)
-					paint.setColor(Color.BLUE);
-				if (z <= -1)
-					paint.setColor(Color.GREEN);
-				if (z <= -2)
-					paint.setColor(Color.YELLOW);
-				if (z >= 1)
-					paint.setColor(Color.RED);
-				if (z >= 2)
-					paint.setColor(Color.WHITE);
-				canvas.drawLine(x, y, x2, y2, paint);
-
-				/*
-				 * if (arrayPoints3d.size() <= i - 1) { arrayPoints3d.add(new
-				 * float[] { x, y }); } else { arrayPoints3d.get(i - 1)[0] = x;
-				 * arrayPoints3d.get(i - 1)[1] = y; } if (i - 1 <=
-				 * arrayPoints3d.size() && i == (dataPoints3d.size() - 1)) { int
-				 * s = arrayPoints3d.size(); for (int j = (i - 1); j < s; j++) {
-				 * arrayPoints3d.remove(j); } }
-				 */
-			}
-			DataManager.getInstance().offerfifoBitmap(mutableBitmap);
-			if (odoPacket.getStringtrame() == null)
-				return;
-			String test = odoPacket.getStringtrame().getText();
-			txt_opengl.setText(test);
 		}
+		synchronized (bitmapThread.lock) {
+			bitmapThread.lock.notifyAll();
+			Log.e("thread", "display image demand");*/
+			/*
+			 * String test = odoPacket.getStringtrame().getText();
+			 * txt_opengl.setText(test);
+			 */
+		//}
 	}
 
 	@Override
