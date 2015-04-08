@@ -6,8 +6,13 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.naio.diagnostic.utils.Config;
@@ -24,6 +29,7 @@ public class ReadSocketThread extends Thread {
 	private final Object lock2 = new Object();
 	private int port;
 	private NewMemoryBuffer newmemoryBuffer;
+	private ByteBuffer buffer;
 
 	public ReadSocketThread(MemoryBuffer memoryBuffer, int port) {
 		this.port = port;
@@ -34,8 +40,8 @@ public class ReadSocketThread extends Thread {
 		this.port = port;
 		this.newmemoryBuffer = memoryBuffer;
 		this.stop = true;
+		buffer = ByteBuffer.allocate(Config.BUFFER_SIZE);
 	}
-	
 
 	public void run() {
 		int charsRead = 0;
@@ -45,44 +51,78 @@ public class ReadSocketThread extends Thread {
 		else
 			netClient = new NetClient(Config.HOST, port, "0");
 		netClient.connectWithServer();
+		Selector selector = null;
+
+		try {
+			selector = Selector.open();
+			SelectionKey key = netClient.socketChannel.register(selector,
+					SelectionKey.OP_READ);
+		} catch (ClosedChannelException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		try {
 			while (this.stop) {
-				if (netClient.socketChannel != null) {
-					if ((charsRead = netClient.socketChannel.read(DataManager
-							.getInstance().getBuffer())) > -1) {
+				int readyChannels = selector.select();
 
-						if (charsRead > 0) {
-							Log.e("charsRead", "" + charsRead);
-							newmemoryBuffer.addToFifo(DataManager.getInstance()
-									.getBuffer().array(), charsRead,
-									DataManager.getInstance().getBuffer()
-											.arrayOffset());
-						}
-						DataManager.getInstance().getBuffer().clear();
-						if (!netClient.testConnection()) {
-							netClient.disConnectWithServer();
-							stop = false;
+				if (readyChannels == 0)
+					continue;
+
+				Set<SelectionKey> selectedKeys = selector.selectedKeys();
+
+				Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+				while (keyIterator.hasNext()) {
+
+					SelectionKey key = keyIterator.next();
+
+					if (key.isAcceptable()) {
+						// a connection was accepted by a ServerSocketChannel.
+
+					} else if (key.isConnectable()) {
+						// a connection was established with a remote server.
+
+					} else if (key.isReadable()) {
+						if (netClient.socketChannel != null) {
+							if ((charsRead = netClient.socketChannel
+									.read(buffer)) > -1) {
+
+								if (charsRead > 0) {
+									Log.e("charsRead", "" + charsRead);
+									newmemoryBuffer.addToFifo(buffer.array(),
+											charsRead, buffer.arrayOffset());
+								}
+								buffer.clear();
+								if (!netClient.testConnection()) {
+									netClient.disConnectWithServer();
+									stop = false;
+								}
+
+							} else {
+								Log.e("states", "close");
+								if (!netClient.testConnection()) {
+									netClient.disConnectWithServer();
+									stop = false;
+								}
+
+							}
+						} else {
+							if (!netClient.testConnection()) {
+								netClient.disConnectWithServer();
+								stop = false;
+							}
+							// Log.e("socket", "pas de in");
+
 						}
 
-					} else {
-						Log.e("states", "close");
-						if (!netClient.testConnection()) {
-							netClient.disConnectWithServer();
-							stop = false;
-						}
-						
-
+					} else if (key.isWritable()) {
+						// a channel is ready for writing
 					}
-				} else {
-					if (!netClient.testConnection()) {
-						netClient.disConnectWithServer();
-						stop = false;
-					}
-					// Log.e("socket", "pas de in");
 
-	
-
+					keyIterator.remove();
 				}
+
 			}
 		} catch (IOException e) {
 
@@ -99,6 +139,7 @@ public class ReadSocketThread extends Thread {
 	public void setStop(boolean stop) {
 		synchronized (lock2) {
 			this.stop = stop;
+			netClient.disConnectWithServer();
 		}
 
 	}

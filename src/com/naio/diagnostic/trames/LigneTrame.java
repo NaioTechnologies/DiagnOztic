@@ -33,18 +33,42 @@ public class LigneTrame extends Trame {
 
 		if (data.length- offsetParam >= 6 + nbrLines * 4 * 3 * 2) {
 			for (int i = 0; i < nbrLines; i++) {
-				byte[] point3d_x = new byte[] { data[offset + 3],
-						data[offset + 2], data[offset + 1], data[offset] };
-				byte[] point3d_y = new byte[] { data[offset + 7],
-						data[offset + 6], data[offset + 5], data[offset + 4] };
-				byte[] point3d_z = new byte[] { data[offset + 11],
-						data[offset + 10], data[offset + 9], data[offset + 8] };
-				byte[] point3d_x_2 = new byte[] { data[offset + 15],
-						data[offset + 14], data[offset + 13], data[offset+12] };
-				byte[] point3d_y_2 = new byte[] { data[offset + 19],
-						data[offset + 18], data[offset + 17], data[offset + 16] };
-				byte[] point3d_z_2 = new byte[] { data[offset + 23],
-						data[offset + 22], data[offset + 21], data[offset + 20] };
+				byte[] point3d_x = new byte[] { 
+						data[offset + 3],
+						data[offset + 2], 
+						data[offset + 1],
+						data[offset] };
+				
+				byte[] point3d_y = new byte[] { 
+						data[offset + 7],
+						data[offset + 6], 
+						data[offset + 5], 
+						data[offset + 4] };
+				
+				byte[] point3d_z = new byte[] { 
+						data[offset + 11],
+						data[offset + 10], 
+						data[offset + 9], 
+						data[offset + 8] };
+				
+				byte[] point3d_x_2 = new byte[] { 
+						data[offset + 15],
+						data[offset + 14], 
+						data[offset + 13], 
+						data[offset + 12] };
+				
+				byte[] point3d_y_2 = new byte[] { 
+						data[offset + 19],
+						data[offset + 18], 
+						data[offset + 17], 
+						data[offset + 16] };
+				
+				byte[] point3d_z_2 = new byte[] { 
+						data[offset + 23],
+						data[offset + 22], 
+						data[offset + 21], 
+						data[offset + 20] };
+				
 				offset = offset + Config.POINTS3D_SIZE_IN_BYTES*2;
 				if (type == 0) {
 					int[] point3d = new int[6];
@@ -101,18 +125,42 @@ public class LigneTrame extends Trame {
 		Log.e("lignes",""+(data.length - offsetParam) + " compare to "+(6 + nbrLines * 4 * 3 * 2));
 		if (data.length - offsetParam >= 6 + nbrLines * 4 * 3 * 2) {
 			for (int i = 0; i < nbrLines; i++) {
-				byte[] point3d_x = new byte[] { data[offset + 3],
-						data[offset + 2], data[offset + 1], data[offset] };
-				byte[] point3d_y = new byte[] { data[offset + 7],
-						data[offset + 6], data[offset + 5], data[offset + 4] };
-				byte[] point3d_z = new byte[] { data[offset + 11],
-						data[offset + 10], data[offset + 9], data[offset + 8] };
-				byte[] point3d_x_2 = new byte[] { data[offset + 15],
-						data[offset + 14], data[offset + 13], data[offset+12] };
-				byte[] point3d_y_2 = new byte[] { data[offset + 19],
-						data[offset + 18], data[offset + 17], data[offset + 16] };
-				byte[] point3d_z_2 = new byte[] { data[offset + 23],
-						data[offset + 22], data[offset + 21], data[offset + 20] };
+				byte[] point3d_x = new byte[] { 
+						data[offset + 3],
+						data[offset + 2],
+						data[offset + 1], 
+						data[offset] };
+				
+				byte[] point3d_y = new byte[] { 
+						data[offset + 7],
+						data[offset + 6], 
+						data[offset + 5], 
+						data[offset + 4] };
+				
+				byte[] point3d_z = new byte[] {
+						data[offset + 11],
+						data[offset + 10], 
+						data[offset + 9],
+						data[offset + 8] };
+				
+				byte[] point3d_x_2 = new byte[] { 
+						data[offset + 15],
+						data[offset + 14],
+						data[offset + 13], 
+						data[offset + 12] };
+				
+				byte[] point3d_y_2 = new byte[] { 
+						data[offset + 19],
+						data[offset + 18],
+						data[offset + 17],
+						data[offset + 16] };
+				
+				byte[] point3d_z_2 = new byte[] { 
+						data[offset + 23],
+						data[offset + 22], 
+						data[offset + 21], 
+						data[offset + 20] };
+				
 				offset = offset + Config.POINTS3D_SIZE_IN_BYTES*2;
 				if (type == 0) {
 					int[] point3d = new int[6];

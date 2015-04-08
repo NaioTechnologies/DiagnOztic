@@ -61,7 +61,7 @@ import android.widget.TextView;
  * 
  */
 public class LidarGPSMotorsActivity extends FragmentActivity {
-	private static final int MILLISECONDS_RUNNABLE = 64; // 64 for 15fps
+	private static final int MILLISECONDS_RUNNABLE = 1; // 64 for 15fps
 
 	private OpenGLES20Fragment openglfragment;
 	private TrameDecoder trameDecoder;
@@ -150,7 +150,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			// enable multitouch
 			mapView.setMultiTouchControls(true);
 			// mapView.setTileSource(TileSourceFactory.MAPNIK);
-			String m_locale = Locale.getDefault().getISO3Language() + "-"
+			/*String m_locale = Locale.getDefault().getISO3Language() + "-"
 					+ Locale.getDefault().getISO3Language();
 			// String m_locale = Locale.getDefault().getDisplayName();
 			BingMapTileSource.retrieveBingKey(this);
@@ -170,14 +170,14 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			mapView.getController()
 					.setCenter(new GeoPoint(43.560597, 1.491833));
 			OverlayItem myLocationOverlayItem = new OverlayItem("Here",
-					"Naio ", new GeoPoint(43.560597, 1.491833));
+					"Naio ", new GeoPoint(43.560597, 1.491833));*/
 			/*
 			 * Drawable myCurrentLocationMarker =
 			 * this.getResources().getDrawable(R.drawable.map_marker_small);
 			 * myLocationOverlayItem.setMarker(myCurrentLocationMarker);
 			 */
 
-			final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
+			/*final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
 			items.add(myLocationOverlayItem);
 			currentLocationOverlay = new ItemizedIconOverlay<OverlayItem>(
 					items,
@@ -192,7 +192,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 							return true;
 						}
 					}, resProxyImpl);
-			mapView.getOverlays().add(currentLocationOverlay);
+			mapView.getOverlays().add(currentLocationOverlay);*/
 
 			set_the_analogueView();
 			set_the_dpadView();
@@ -273,7 +273,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			 * map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 18));
 			 * firstTimeDisplayTheMap = false; }
 			 */
-			GeoPoint latlng = new GeoPoint(gps.getLat(), gps.getLon());
+			/*GeoPoint latlng = new GeoPoint(gps.getLat(), gps.getLon());
 			OverlayItem myLocationOverlayItem = new OverlayItem("Here", "Oz",
 					latlng);
 
@@ -300,7 +300,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 				mapView.getController().setZoom(18);
 				mapView.getController().setCenter(latlng);
 				firstTimeDisplayTheMap = false;
-			}
+			}*/
 			// TODO : on affiche vraiment la road ? Plus ça avance et plus elle
 			// devient longue à afficher et ça fait tout ramer
 			/*
@@ -308,7 +308,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			 * roadOverlay = RoadManager.buildRoadOverlay(road, this);
 			 * mapView.getOverlays().add(roadOverlay);
 			 */
-			mapView.invalidate();
+			//mapView.invalidate();
 		}
 	}
 

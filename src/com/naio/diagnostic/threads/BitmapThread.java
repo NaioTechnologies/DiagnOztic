@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.DataManager;
+import com.naio.diagnostic.utils.GrayToChromadepth;
 import com.naio.diagnostic.utils.NewMemoryBuffer;
 
 import android.graphics.Bitmap;
@@ -25,6 +26,7 @@ public class BitmapThread extends Thread {
 	public static Object lock2 = new Object();
 	public static int threadIndex = 0;
 	private int nbrOfTimeTheSameShit = 0;
+	private GrayToChromadepth grayToChromadepth;
 
 	public BitmapThread(NewMemoryBuffer memBuff) {
 		opt = new BitmapFactory.Options();
@@ -35,6 +37,8 @@ public class BitmapThread extends Thread {
 		continueTheThread = true;
 		trameDecoder = new TrameDecoder();
 		memoryBufferLog = memBuff;
+		grayToChromadepth = new GrayToChromadepth();
+		grayToChromadepth.compute_lut();
 	}
 
 	public void quit() {
@@ -58,7 +62,7 @@ public class BitmapThread extends Thread {
 				}
 			}
 			pollFifo = memoryBufferLog.getPollFifo();
-			Log.e("notify","fifo took in bitmap thread");
+			Log.e("notify", "fifo took in bitmap thread");
 			if (oldPollFifo == pollFifo) {
 				nbrOfTimeTheSameShit++;
 				if (nbrOfTimeTheSameShit > 5) {
@@ -73,7 +77,7 @@ public class BitmapThread extends Thread {
 			oldPollFifo = pollFifo;
 			OdometryPacket odoPacket = (OdometryPacket) trameDecoder
 					.decode(pollFifo);
-			Log.e("notify","decode the fifo in bitmap thread");
+			Log.e("notify", "decode the fifo in bitmap thread");
 			if (odoPacket == null)
 				continue;
 			if (odoPacket.getJpegtrame() == null)
@@ -113,17 +117,14 @@ public class BitmapThread extends Thread {
 				float z = dataPoints3d.get(i)[2];
 
 				paint.setAntiAlias(true);
-				if (z <= 0)
-					paint.setColor(Color.BLUE);
-				if (z <= -1)
-					paint.setColor(Color.GREEN);
-				if (z <= -2)
-					paint.setColor(Color.YELLOW);
-				if (z >= 1)
-					paint.setColor(Color.RED);
-				if (z >= 2)
-					paint.setColor(Color.WHITE);
-				canvas.drawCircle(x - 1, y - 1, 6, paint);
+				int[] rgb = new int[3];
+				if (z > 255 || z < 0)
+					paint.setColor(Color.rgb(255, 255, 255));
+				else {
+					grayToChromadepth.getRGBFromZ(z, rgb);
+					paint.setColor(Color.rgb(rgb[0], rgb[1], rgb[2]));
+					canvas.drawCircle(x - 1, y - 1, 4, paint);
+				}
 
 				/*
 				 * if (arrayPoints3d.size() <= i - 1) { arrayPoints3d.add(new
@@ -154,17 +155,13 @@ public class BitmapThread extends Thread {
 				float y2 = dataLines3d.get(i)[4];
 				float z2 = dataLines3d.get(i)[5];
 
-				paint.setAntiAlias(true);
-				if (z <= 0)
-					paint.setColor(Color.BLUE);
-				if (z <= -1)
-					paint.setColor(Color.GREEN);
-				if (z <= -2)
-					paint.setColor(Color.YELLOW);
-				if (z >= 1)
-					paint.setColor(Color.RED);
-				if (z >= 2)
-					paint.setColor(Color.WHITE);
+				int[] rgb = new int[3];
+				if (z > 255 || z < 0)
+					paint.setColor(Color.rgb(255, 255, 255));
+				else {
+					grayToChromadepth.getRGBFromZ(z, rgb);
+					paint.setColor(Color.rgb(rgb[0], rgb[1], rgb[2]));
+				}
 				canvas.drawLine(x, y, x2, y2, paint);
 
 				/*
@@ -178,13 +175,13 @@ public class BitmapThread extends Thread {
 			}
 			DataManager.getInstance().offerfifoBitmap(mutableBitmap);
 			Log.e("thread", "offer so the end");
-			
+
 			if (odoPacket.getStringtrame() == null)
 				continue;
-			
-			 String test = odoPacket.getStringtrame().getText();
-			 DataManager.getInstance().offerStringOdoPacket(test);
-			 
+
+			String test = odoPacket.getStringtrame().getText();
+			DataManager.getInstance().offerStringOdoPacket(test);
+
 		}
 	}
 }
