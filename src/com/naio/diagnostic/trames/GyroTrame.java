@@ -17,9 +17,18 @@ public class GyroTrame extends Trame {
 		super(data);
 		instantiate = true;
 		int offset = Config.LENGHT_FULL_HEADER;
-		gyro_x = new byte[] { data[offset + 1], data[offset] };
-		gyro_y = new byte[] { data[offset + 3], data[offset + 2] };
-		gyro_z = new byte[] { data[offset + 5], data[offset + 4] };
+		
+		gyro_x = new byte[] { 
+				data[offset + 1], 
+				data[offset] };
+		
+		gyro_y = new byte[] { 
+				data[offset + 3], 
+				data[offset + 2] };
+		
+		gyro_z = new byte[] {
+				data[offset + 5], 
+				data[offset + 4] };
 	}
 
 	public String show() {

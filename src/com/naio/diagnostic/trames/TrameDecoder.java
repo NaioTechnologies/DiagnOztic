@@ -41,12 +41,8 @@ public class TrameDecoder {
 			break;
 		case Config.ID_REMOTE :
 			return new RemoteTrame(pollFifo);
-		case Config.ID_KEYPAD :
-			return new KeyPadTrame(pollFifo);
 		case Config.ID_SPEAKER :
 			return new SpeakerTrame(pollFifo);
-		case Config.ID_LED :
-			return new LedTrame(pollFifo);
 		case Config.ID_SCREEN :
 			return new ScreenTrame(pollFifo);
 		case Config.ID_MAGNETO :

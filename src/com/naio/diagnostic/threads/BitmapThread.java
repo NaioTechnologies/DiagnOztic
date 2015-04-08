@@ -115,7 +115,7 @@ public class BitmapThread extends Thread {
 				float x = dataPoints3d.get(i)[0];
 				float y = dataPoints3d.get(i)[1];
 				float z = dataPoints3d.get(i)[2];
-
+				
 				paint.setAntiAlias(true);
 				int[] rgb = new int[3];
 				if (z > 255 || z < 0)
@@ -163,7 +163,6 @@ public class BitmapThread extends Thread {
 					paint.setColor(Color.rgb(rgb[0], rgb[1], rgb[2]));
 				}
 				canvas.drawLine(x, y, x2, y2, paint);
-
 				/*
 				 * if (arrayPoints3d.size() <= i - 1) { arrayPoints3d.add(new
 				 * float[] { x, y }); } else { arrayPoints3d.get(i - 1)[0] = x;

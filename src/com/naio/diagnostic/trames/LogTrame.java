@@ -52,18 +52,30 @@ public class LogTrame extends Trame {
 						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG + Config.LENGHT_CHECKSUM)) {
 
 					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
-						ligne_a_x = new byte[] { data[offset + 3],
-								data[offset + 2], data[offset + 1],
+						ligne_a_x = new byte[] { 
+								data[offset + 3],
+								data[offset + 2], 
+								data[offset + 1],
 								data[offset] };
-						ligne_a_y = new byte[] { data[offset + 7],
-								data[offset + 6], data[offset + 5],
+						
+						ligne_a_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
 								data[offset + 4] };
-						ligne_b_x = new byte[] { data[offset + 11],
-								data[offset + 10], data[offset + 9],
+						
+						ligne_b_x = new byte[] { 
+								data[offset + 11],
+								data[offset + 10],
+								data[offset + 9],
 								data[offset + 8] };
-						ligne_b_y = new byte[] { data[offset + 15],
-								data[offset + 14], data[offset + 13],
+						
+						ligne_b_y = new byte[] {
+								data[offset + 15],
+								data[offset + 14],
+								data[offset + 13],
 								data[offset + 12] };
+						
 						offset = offset + Config.LINES_SIZE_IN_BYTES;
 						arrayListPoint.add(getPoints());
 					}
@@ -102,12 +114,18 @@ public class LogTrame extends Trame {
 					Log.e("h and w",""+ dim[0]+"---"+dim[1]);
 					arrayListPoints2D.add(dim);
 					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
-						points2d_x = new byte[] { data[offset + 3],
-								data[offset + 2], data[offset + 1],
+						points2d_x = new byte[] {
+								data[offset + 3],
+								data[offset + 2],
+								data[offset + 1],
 								data[offset] };
-						points2d_y = new byte[] { data[offset + 7],
-								data[offset + 6], data[offset + 5],
+						
+						points2d_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
 								data[offset + 4] };
+						
 						offset = offset + Config.POINTS2D_SIZE_IN_BYTES;
 						arrayListPoints2D.add(getPoint2D());
 					}
@@ -173,18 +191,30 @@ public class LogTrame extends Trame {
 						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG + Config.LENGHT_CHECKSUM)) {
 
 					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
-						ligne_a_x = new byte[] { data[offset + 3],
-								data[offset + 2], data[offset + 1],
+						ligne_a_x = new byte[] {
+								data[offset + 3],
+								data[offset + 2],
+								data[offset + 1],
 								data[offset] };
-						ligne_a_y = new byte[] { data[offset + 7],
-								data[offset + 6], data[offset + 5],
+						
+						ligne_a_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
 								data[offset + 4] };
-						ligne_b_x = new byte[] { data[offset + 11],
-								data[offset + 10], data[offset + 9],
+						
+						ligne_b_x = new byte[] {
+								data[offset + 11],
+								data[offset + 10],
+								data[offset + 9],
 								data[offset + 8] };
-						ligne_b_y = new byte[] { data[offset + 15],
-								data[offset + 14], data[offset + 13],
+						
+						ligne_b_y = new byte[] { 
+								data[offset + 15],
+								data[offset + 14],
+								data[offset + 13],
 								data[offset + 12] };
+						
 						offset = offset + Config.LINES_SIZE_IN_BYTES;
 						arrayListPoint.add(getPoints());
 					}
@@ -223,12 +253,18 @@ public class LogTrame extends Trame {
 					Log.e("h and w",""+ dim[0]+"---"+dim[1]);
 					arrayListPoints2D.add(dim);
 					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
-						points2d_x = new byte[] { data[offset + 3],
-								data[offset + 2], data[offset + 1],
+						points2d_x = new byte[] {
+								data[offset + 3],
+								data[offset + 2], 
+								data[offset + 1],
 								data[offset] };
-						points2d_y = new byte[] { data[offset + 7],
-								data[offset + 6], data[offset + 5],
+						
+						points2d_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
 								data[offset + 4] };
+						
 						offset = offset + Config.POINTS2D_SIZE_IN_BYTES;
 						arrayListPoints2D.add(getPoint2D());
 					}
@@ -259,15 +295,24 @@ public class LogTrame extends Trame {
 					Log.e("h and w and d",""+ dim[0]+"---"+dim[1]+"---"+dim[2]);
 					arrayListPoints3D.add(dim);
 					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
-						points3d_x = new byte[] { data[offset + 3],
-								data[offset + 2], data[offset + 1],
+						points3d_x = new byte[] { 
+								data[offset + 3],
+								data[offset + 2],
+								data[offset + 1],
 								data[offset] };
-						points3d_y = new byte[] { data[offset + 7],
-								data[offset + 6], data[offset + 5],
+						
+						points3d_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6], 
+								data[offset + 5],
 								data[offset + 4] };
-						points3d_z = new byte[] { data[offset + 11],
-								data[offset + 10], data[offset + 9],
+						
+						points3d_z = new byte[] { 
+								data[offset + 11],
+								data[offset + 10],
+								data[offset + 9],
 								data[offset + 8] };
+						
 						offset = offset + Config.POINTS3D_SIZE_IN_BYTES;
 						arrayListPoints3D.add(getPoint3D());
 					}
