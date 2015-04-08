@@ -181,10 +181,10 @@ public class BitmapThread extends Thread {
 			
 			if (odoPacket.getStringtrame() == null)
 				continue;
-			/*
-			 * String test = odoPacket.getStringtrame().getText();
-			 * txt_opengl.setText(test);
-			 */
+			
+			 String test = odoPacket.getStringtrame().getText();
+			 DataManager.getInstance().offerStringOdoPacket(test);
+			 
 		}
 	}
 }

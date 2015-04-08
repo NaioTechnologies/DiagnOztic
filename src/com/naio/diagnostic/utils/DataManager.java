@@ -31,6 +31,8 @@ public class DataManager {
 	private ConcurrentLinkedQueue<ArrayList<float[]>> fifoPoints3D = new ConcurrentLinkedQueue<ArrayList<float[]>>();
 	private ConcurrentLinkedQueue<Bitmap> fifoBitmap = new ConcurrentLinkedQueue<Bitmap>();
 	private ByteBuffer buffer;
+	public static final Object lock2 = new Object();
+	private ConcurrentLinkedQueue<String> fifoStringOdoPacket = new ConcurrentLinkedQueue<String>();
 
 	private static DataManager instance;
 
@@ -209,7 +211,7 @@ public class DataManager {
 			}
 			fifoBitmap.offer(mutableBitmap);
 			lock.notifyAll();
-			Log.e("notify","offered");
+			Log.e("notify", "offered");
 		}
 	}
 
@@ -235,6 +237,37 @@ public class DataManager {
 		fifoPoints2D.offer(arrayListPoints2D);
 		for (int i = 0; i < fifoPoints2D.size() - 1; i++) {
 			fifoPoints2D.poll().clear();
+		}
+	}
+
+	public void offerStringOdoPacket(String test) {
+		synchronized (lock2) {
+
+			for (int i = 0; i < fifoStringOdoPacket.size(); i++) {
+				String b = fifoStringOdoPacket.poll();
+				b = null;
+
+			}
+			fifoStringOdoPacket.offer(test);
+			lock2.notifyAll();
+		}
+
+	}
+	
+	public String getPollFifoStringOdoPacket(){
+		synchronized (lock2) {
+			
+		try {
+			lock2.wait(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if(fifoStringOdoPacket.size() == 0)
+			return "";
+		for (int i = 0; i < fifoStringOdoPacket.size() - 1; i++) {
+			fifoStringOdoPacket.poll();
+		}
+		return fifoStringOdoPacket.peek();
 		}
 	}
 

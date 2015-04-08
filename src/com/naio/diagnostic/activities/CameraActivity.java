@@ -60,7 +60,7 @@ import android.widget.TextView;
  * 
  */
 public class CameraActivity extends FragmentActivity {
-	private static final long MILLISECONDS_RUNNABLE = 0; // 64 for 15fps
+	private static final long MILLISECONDS_RUNNABLE = 64; // 64 for 15fps
 
 	private TrameDecoder trameDecoder;
 
@@ -325,7 +325,7 @@ public class CameraActivity extends FragmentActivity {
 			bitmapThread.start();
 			// readSocketThreadOdo.start();
 
-			//handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+			handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 		}
 	}
 
@@ -339,7 +339,7 @@ public class CameraActivity extends FragmentActivity {
 		view.onPause();
 		
 		// readSocketThreadOdo.setStop(false);
-		//handler.removeCallbacks(runnable);
+		handler.removeCallbacks(runnable);
 		stop_the_handler = true;
 
 	}
@@ -361,21 +361,13 @@ public class CameraActivity extends FragmentActivity {
 	}
 
 	private void display_image() {
-		/*synchronized (bitmapThread.lock2) {
-			try {
-				bitmapThread.lock2.wait(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		synchronized (bitmapThread.lock) {
-			bitmapThread.lock.notifyAll();
-			Log.e("thread", "display image demand");*/
-			/*
-			 * String test = odoPacket.getStringtrame().getText();
-			 * txt_opengl.setText(test);
-			 */
-		//}
+		
+			
+				
+			 String test = DataManager.getInstance().getPollFifoStringOdoPacket();
+			 txt_opengl.setText(test);
+			 
+		
 	}
 
 	@Override
