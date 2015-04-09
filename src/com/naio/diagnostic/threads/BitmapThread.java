@@ -91,8 +91,7 @@ public class BitmapThread extends Thread {
 			 * (InterruptedException e) { e.printStackTrace(); } }
 			 */
 			byte[] dataf = odoPacket.getJpegtrame().getImgData();
-			mutableBitmap = BitmapFactory.decodeByteArray(dataf, 0,
-					dataf.length, opt);
+			mutableBitmap = BitmapFactory.decodeByteArray(dataf, 0,dataf.length, opt);
 
 			Log.e("thread", "decode done");
 			dataf = null;
@@ -102,8 +101,7 @@ public class BitmapThread extends Thread {
 				DataManager.getInstance().offerfifoBitmap(mutableBitmap);
 				continue;
 			}
-			ArrayList<float[]> dataPoints3d = odoPacket.getPointtrame()
-					.getArrayListPoints3DFloat();
+			ArrayList<float[]> dataPoints3d = odoPacket.getPointtrame().getArrayListPoints3DFloat();
 			if (dataPoints3d == null) {
 				DataManager.getInstance().offerfifoBitmap(mutableBitmap);
 				continue;
@@ -156,13 +154,17 @@ public class BitmapThread extends Thread {
 				float z2 = dataLines3d.get(i)[5];
 
 				int[] rgb = new int[3];
-				if (z > 255 || z < 0)
+				if (z > 255 || z < 1 || x < 0 || y <0 || x2 <0 || z2 <0 || y2 <0)
 					paint.setColor(Color.rgb(255, 255, 255));
 				else {
 					grayToChromadepth.getRGBFromZ(z, rgb);
 					paint.setColor(Color.rgb(rgb[0], rgb[1], rgb[2]));
+					if(rgb[2] > 250)
+						Log.e("sdfghjk",""+rgb[0] +"___" +rgb[1]+"_____"+ rgb[2]+ "____" + x+"___"+y+"____"+z+"___"+x2+"___"+y2+"____"+i);
+					canvas.drawLine(x, y, x2, y2, paint);
 				}
-				canvas.drawLine(x, y, x2, y2, paint);
+				
+				
 				/*
 				 * if (arrayPoints3d.size() <= i - 1) { arrayPoints3d.add(new
 				 * float[] { x, y }); } else { arrayPoints3d.get(i - 1)[0] = x;

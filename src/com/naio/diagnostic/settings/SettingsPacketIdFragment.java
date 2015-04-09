@@ -1,6 +1,7 @@
-package com.naio.diagnostic.utils;
+package com.naio.diagnostic.settings;
 
 import com.naio.diagnostic.R;
+import com.naio.diagnostic.utils.Config;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -24,23 +25,17 @@ public class SettingsPacketIdFragment extends PreferenceFragment {
 		EditTextPreference idActuator = (EditTextPreference) findPreference("id_actuator");
 		EditTextPreference idOdoPacket = (EditTextPreference) findPreference("id_odo_packet");
 		EditTextPreference idLidarPacket = (EditTextPreference) findPreference("id_lidar_packet");
+		
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-		SharedPreferences sharedPref = PreferenceManager
-				.getDefaultSharedPreferences(getActivity());
-
-		idMotors.setSummary(sharedPref.getString("id_motors", ""
-				+ Config.ID_MOTORS));
+		idMotors.setSummary(sharedPref.getString("id_motors", ""+ Config.ID_MOTORS));
 		idlog.setSummary(sharedPref.getString("id_log", "" + Config.ID_LOG));
 		idGps.setSummary(sharedPref.getString("id_gps", "" + Config.ID_GPS));
-		idActuator.setSummary(sharedPref.getString("id_actuator", ""
-				+ Config.ID_ACTUATOR));
-		idOdoPacket.setSummary(sharedPref.getString("id_odo_packet", ""
-				+ Config.ID_ODO_PACKET));
-		idLidarPacket.setSummary(sharedPref.getString("id_lidar_packet", ""
-				+ Config.ID_LIDAR_PACKET));
+		idActuator.setSummary(sharedPref.getString("id_actuator", ""+ Config.ID_ACTUATOR));
+		idOdoPacket.setSummary(sharedPref.getString("id_odo_packet", ""+ Config.ID_ODO_PACKET));
+		idLidarPacket.setSummary(sharedPref.getString("id_lidar_packet", ""	+ Config.ID_LIDAR_PACKET));
 
-		sharedPref
-				.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
+		sharedPref.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
 
 					@Override
 					public void onSharedPreferenceChanged(

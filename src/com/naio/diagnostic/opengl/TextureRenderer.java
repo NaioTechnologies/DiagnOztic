@@ -1,4 +1,4 @@
-package com.naio.opengl;
+package com.naio.diagnostic.opengl;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -11,6 +11,7 @@ import com.naio.diagnostic.R;
 import com.naio.diagnostic.utils.DataManager;
 import com.naio.diagnostic.utils.ShaderHelper;
 import com.naio.diagnostic.utils.TextureHelper;
+import com.naio.opengl.RawResourceReader;
 
 import android.content.Context;
 import android.opengl.GLES20;

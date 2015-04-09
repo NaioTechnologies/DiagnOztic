@@ -21,63 +21,7 @@ public class OdometryPacket extends BasePacket {
 
 	public OdometryPacket(byte[] data) {
 		super(data);
-		int offset = Config.LENGHT_FULL_HEADER;
-		while (offset < data.length - Config.LENGHT_FULL_HEADER) {
-			Log.e("offset",
-					""
-							+ offset
-							+ "----"
-							+ data[offset]
-							+ "--"
-							+ data[offset + 1]
-							+ "----"
-							+ (data.length - Config.LENGHT_CHECKSUM - Config.LENGHT_FULL_HEADER));
-			switch (data[offset]) {
-			case JPEG:
-				offset++;
-				int sizeJpeg = ByteBuffer.wrap(
-						new byte[] { data[offset], data[offset + 1],
-								data[offset + 2], data[offset + 3] }).getInt(0);
-				Log.e("sizejpeg", "" + sizeJpeg);
-				offset += 4;
-				jpegtrame = new JPEGTrame(Arrays.copyOfRange(data, offset,
-						offset + sizeJpeg));
-				offset += sizeJpeg;
-				break;
-			case POINTS:
-				offset++;
-				int nbrPoints = ByteBuffer.wrap(
-						new byte[] { data[offset + 2], data[offset + 3],
-								data[offset + 4], data[offset + 5] }).getInt(0);
-				Log.e("offsetpoint", "" + nbrPoints);
-				pointtrame = new PointTrame(data, offset);
-				offset += nbrPoints * Config.POINTS3D_SIZE_IN_BYTES + 6;
-				break;
-			case LINES:
-				offset++;
-				int nbrLines = ByteBuffer.wrap(
-						new byte[] { data[offset + 2], data[offset + 3],
-								data[offset + 4], data[offset + 5] }).getInt(0);
-				Log.e("offsetline", "" + nbrLines);
-				linetrame = new LigneTrame(data, offset);
-				offset += nbrLines * Config.POINTS3D_SIZE_IN_BYTES * 2 + 6;
-				break;
-			case STRING:
-				offset++;
-				int sizeString = ByteBuffer.wrap(
-						new byte[] { data[offset], data[offset + 1],
-								data[offset + 2], data[offset + 3] }).getInt(0);
-				offset += 4;
-				Log.e("stringtrame", "" + sizeString + "---");
-				stringtrame = new StringTrame(Arrays.copyOfRange(data, offset,
-						offset + sizeString));
-				offset += sizeString;
-				break;
-			default:
-				return;
-			}
-
-		}
+		setBytes(data);
 	}
 
 	public OdometryPacket() {
@@ -115,36 +59,34 @@ public class OdometryPacket extends BasePacket {
 	public Trame setBytes(byte[] data) {
 		int offset = Config.LENGHT_FULL_HEADER;
 		while (offset < data.length - Config.LENGHT_FULL_HEADER) {
-			Log.e("offset",
-					""
-							+ offset
-							+ "----"
-							+ data[offset]
-							+ "--"
-							+ data[offset + 1]
-							+ "----"
-							+ (data.length - Config.LENGHT_FULL_HEADER));
+			Log.e("offset",	""+ offset+ "----"+ data[offset]+ "--"+ data[offset + 1]+ "----"+ (data.length - Config.LENGHT_FULL_HEADER));
 			switch (data[offset]) {
 			case JPEG:
 				offset++;
 				int sizeJpeg = ByteBuffer.wrap(
-						new byte[] { data[offset], data[offset + 1],
-								data[offset + 2], data[offset + 3] }).getInt(0);
+						new byte[] { 
+								data[offset],
+								data[offset + 1],
+								data[offset + 2],
+								data[offset + 3] }
+						).getInt(0);
 				Log.e("sizejpeg", "" + sizeJpeg);
 				offset += 4;
 				if (jpegtrame == null)
-					jpegtrame = new JPEGTrame(Arrays.copyOfRange(data, offset,
-							offset + sizeJpeg));
+					jpegtrame = new JPEGTrame(Arrays.copyOfRange(data, offset,offset + sizeJpeg));
 				else
-					jpegtrame.setBytes(Arrays.copyOfRange(data, offset, offset
-							+ sizeJpeg));
+					jpegtrame.setBytes(Arrays.copyOfRange(data, offset, offset+ sizeJpeg));
 				offset += sizeJpeg;
 				break;
 			case POINTS:
 				offset++;
 				int nbrPoints = ByteBuffer.wrap(
-						new byte[] { data[offset + 2], data[offset + 3],
-								data[offset + 4], data[offset + 5] }).getInt(0);
+						new byte[] { 
+								data[offset + 2],
+								data[offset + 3],
+								data[offset + 4],
+								data[offset + 5] }
+						).getInt(0);
 				Log.e("offsetpoint", "" + nbrPoints);
 				if(nbrPoints > 1000)
 					return this;
@@ -157,8 +99,12 @@ public class OdometryPacket extends BasePacket {
 			case LINES:
 				offset++;
 				int nbrLines = ByteBuffer.wrap(
-						new byte[] { data[offset + 2], data[offset + 3],
-								data[offset + 4], data[offset + 5] }).getInt(0);
+						new byte[] { 
+								data[offset + 2],
+								data[offset + 3],
+								data[offset + 4],
+								data[offset + 5] }
+						).getInt(0);
 				Log.e("offsetline", "" + nbrLines);
 				if(nbrLines > 1000)
 					return this;
@@ -171,14 +117,17 @@ public class OdometryPacket extends BasePacket {
 			case STRING:
 				offset++;
 				int sizeString = ByteBuffer.wrap(
-						new byte[] { data[offset], data[offset + 1],
-								data[offset + 2], data[offset + 3] }).getInt(0);
+						new byte[] { 
+								data[offset], 
+								data[offset + 1],
+								data[offset + 2],
+								data[offset + 3] }
+						).getInt(0);
 				offset += 4;
 				Log.e("stringtrame", "" + sizeString + "---");
 				if(sizeString > 200 || sizeString <2)
 					return this;
-				stringtrame = new StringTrame(Arrays.copyOfRange(data, offset,
-						offset + sizeString));
+				stringtrame = new StringTrame(Arrays.copyOfRange(data, offset,offset + sizeString));
 				offset += sizeString;
 				break;
 			default:

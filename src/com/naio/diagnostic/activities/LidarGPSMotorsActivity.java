@@ -21,6 +21,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.naio.diagnostic.R;
+import com.naio.diagnostic.opengl.MyGLSurfaceView;
 import com.naio.diagnostic.opengl.OpenGLES20Fragment;
 import com.naio.diagnostic.threads.ReadSocketThread;
 import com.naio.diagnostic.threads.SendSocketThread;
@@ -30,10 +31,9 @@ import com.naio.diagnostic.trames.LogTrame;
 import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.Config;
 import com.naio.diagnostic.utils.DataManager;
-import com.naio.diagnostic.utils.MyMoveListenerForAnalogueView;
 import com.naio.diagnostic.utils.NewMemoryBuffer;
-import com.naio.opengl.MyGLSurfaceView;
-import com.naio.views.AnalogueView;
+import com.naio.diagnostic.views.AnalogueView;
+import com.naio.diagnostic.views.MyMoveListenerForAnalogueView;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,7 +61,7 @@ import android.widget.TextView;
  * 
  */
 public class LidarGPSMotorsActivity extends FragmentActivity {
-	private static final int MILLISECONDS_RUNNABLE = 1; // 64 for 15fps
+	private static final int MILLISECONDS_RUNNABLE = 0; // 64 for 15fps
 
 	private OpenGLES20Fragment openglfragment;
 	private TrameDecoder trameDecoder;
@@ -123,15 +123,17 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			listPointMap = new ArrayList<LatLng>();
 			listPointMapView = new ArrayList<GeoPoint>();
 			firstTimeDisplayTheMap = true;
-			readSocketThreadMap = new ReadSocketThread(memoryBufferMap,
-					Config.PORT_GPS);
-			readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,
-					Config.PORT_LIDAR);
-			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,
-					Config.PORT_LOG);
+			
+			readSocketThreadMap = new ReadSocketThread(memoryBufferMap,	Config.PORT_GPS);
+			
+			readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,	Config.PORT_LIDAR);
+			
+			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,	Config.PORT_LOG);
+			
 			sendSocketThreadMotors = new SendSocketThread(Config.PORT_MOTORS);
-			sendSocketThreadActuators = new SendSocketThread(
-					Config.PORT_ACTUATOR);
+			
+			sendSocketThreadActuators = new SendSocketThread(Config.PORT_ACTUATOR);
+			
 			DataManager.getInstance().setPoints_position_oz("");
 			getWindow()
 					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -313,12 +315,14 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	}
 
 	private void display_lidar_info() {
+		
 		LidarTrame lidar = (LidarTrame) trameDecoder.decode(memoryBufferLidar
 				.getPollFifo());
 		if (lidar != null) {
 			((MyGLSurfaceView) openglfragment.getView())
 					.update_with_uint16(lidar.data_uint16());
 		}
+		
 	}
 
 	private void display_lidar_lines() {
@@ -378,8 +382,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, -127, -127, 0, 0, 0, 0 };
+					byte[] b = new byte[] { 
+							78, 65, 73, 79, 48, 49,
+							1, 0, 0, 0, 2, 
+							-127, -127, 
+							0, 0, 0, 0 };
 					sendSocketThreadMotors.setBytes(b);
 					mHandler.postDelayed(this, 20);
 				}
@@ -412,8 +419,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, 127, 127, 0, 0, 0, 0 };
+					byte[] b = new byte[] { 
+							78, 65, 73, 79, 48, 49,
+							1, 0, 0, 0,	2, 
+							127, 127, 
+							0, 0, 0, 0 };
 					sendSocketThreadMotors.setBytes(b);
 					mHandler.postDelayed(this, 20);
 				}
@@ -446,8 +456,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, -127, 127, 0, 0, 0, 0 };
+					byte[] b = new byte[] {
+							78, 65, 73, 79, 48, 49, 
+							1, 0, 0, 0,	2,
+							-127, 127,
+							0, 0, 0, 0 };
 					sendSocketThreadMotors.setBytes(b);
 					mHandler.postDelayed(this, 20);
 				}
@@ -480,8 +493,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, 127, -127, 0, 0, 0, 0 };
+					byte[] b = new byte[] {
+							78, 65, 73, 79, 48, 49,
+							1, 0, 0, 0,	2, 
+							127, -127, 
+							0, 0, 0, 0 };
 					sendSocketThreadMotors.setBytes(b);
 					mHandler.postDelayed(this, 20);
 				}
@@ -520,8 +536,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 		Button btn = (Button) findViewById(R.id.actuator_down);
 		Button btn2 = (Button) findViewById(R.id.actuator_up);
 		btn.setOnTouchListener(new OnTouchListener() {
-			byte[] byteDown = new byte[] { 78, 65, 73, 79, 48, 49, 0xf, 1, 0,
-					0, 0, 2, 0, 0, 0, 0 };
+			byte[] byteDown = new byte[] { 
+					78, 65, 73, 79, 48, 49,
+					0xf, 1, 0,0, 0, 
+					2,
+					0, 0, 0, 0 };
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -539,8 +558,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 
 		btn2.setOnTouchListener(new OnTouchListener() {
 
-			byte[] byteDown = new byte[] { 78, 65, 73, 79, 48, 49, 0xf, 1, 0,
-					0, 0, 1, 0, 0, 0, 0 };
+			byte[] byteDown = new byte[] { 
+					78, 65, 73, 79, 48, 49,
+					0xf, 1, 0,0, 0, 
+					1, 
+					0, 0, 0, 0 };
 			private Handler mHandler;
 
 			@Override

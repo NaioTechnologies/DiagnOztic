@@ -1,6 +1,7 @@
-package com.naio.diagnostic.utils;
+package com.naio.diagnostic.settings;
 
 import com.naio.diagnostic.R;
+import com.naio.diagnostic.utils.Config;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -22,16 +23,14 @@ public class SettingsFragment extends PreferenceFragment {
 		SharedPreferences sharedPref = PreferenceManager
 				.getDefaultSharedPreferences(getActivity());
 		hostIp.setSummary(sharedPref.getString("ip_socket", Config.HOST));
-		sharedPref
-				.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
+		sharedPref.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
 
 					@Override
 					public void onSharedPreferenceChanged(
 							SharedPreferences sharedPreferences, String key) {
 						if (key.contains("ip_socket")) {
 							EditTextPreference hostIp = (EditTextPreference) findPreference(key);
-							hostIp.setSummary(sharedPreferences.getString(key,
-									Config.HOST));
+							hostIp.setSummary(sharedPreferences.getString(key,Config.HOST));
 						}
 
 					}

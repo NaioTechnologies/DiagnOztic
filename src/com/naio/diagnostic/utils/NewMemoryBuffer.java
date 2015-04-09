@@ -70,10 +70,15 @@ public class NewMemoryBuffer {
 				}
 				//
 				else if (this.CurrentBufferPos == 11) {
-					byte[] size = new byte[] { this.WorkingBuffer[7],
-							this.WorkingBuffer[8], this.WorkingBuffer[9],
+					byte[] size = new byte[] {
+							this.WorkingBuffer[7],
+							this.WorkingBuffer[8], 
+							this.WorkingBuffer[9],
 							this.WorkingBuffer[10] };
+					
 					this.CurrentPacketSize = ByteBuffer.wrap(size).getInt();
+					
+						
 					/*
 					 * this.WorkingBuffer[12]=0x1; this.WorkingBuffer[13]=0x2;
 					 */
@@ -127,11 +132,10 @@ public class NewMemoryBuffer {
 	private void offer(byte[] copyOfRange) {
 		synchronized (lock) {
 
-			for (int i = 0; i < fifo.size(); i++) {
+			for (int i = 0; i < fifo.size()-1; i++) {
 				byte[] n = fifo.poll();
 				n = null;
 			}
-			System.gc();
 			fifo.offer(copyOfRange);
 			lock.notifyAll();
 			Log.e("notify","thread notify an image and fifo size: "+ fifo.size());

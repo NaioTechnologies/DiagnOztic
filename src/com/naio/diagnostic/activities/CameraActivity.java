@@ -8,6 +8,7 @@ import org.osmdroid.ResourceProxy.bitmap;
 
 import com.naio.diagnostic.R;
 
+import com.naio.diagnostic.opengl.TextureRenderer;
 import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.threads.BitmapThread;
 import com.naio.diagnostic.threads.ReadSocketThread;
@@ -22,7 +23,6 @@ import com.naio.diagnostic.utils.TextureHelper;
 import com.naio.opengl.CircleMesh;
 import com.naio.opengl.OpenGLRenderer;
 import com.naio.opengl.SimplePlane;
-import com.naio.opengl.TextureRenderer;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
@@ -34,6 +34,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLSurfaceView.Renderer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -123,7 +124,7 @@ public class CameraActivity extends FragmentActivity {
 		// GLSurfaceView view = (GLSurfaceView) findViewById(R.id.opengl_view);
 		setContentView(R.layout.camera_activity);
 		view = (GLSurfaceView) findViewById(R.id.opengl_view);// new
-																			// GLSurfaceView(this);
+																// GLSurfaceView(this);
 
 		// Creating and attaching the renderer.
 		renderer = new TextureRenderer(this);
@@ -309,7 +310,7 @@ public class CameraActivity extends FragmentActivity {
 			// memoryBufferOdo = new NewMemoryBuffer();
 			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,
 					Config.PORT_LOG);
-			
+
 			bitmapThread = new BitmapThread(memoryBufferLog);
 
 			/*
@@ -335,9 +336,9 @@ public class CameraActivity extends FragmentActivity {
 		// DataManager.getInstance().write_in_file(this);
 		readSocketThreadLog.setStop(false);
 		bitmapThread.quit();
-		//renderer = null;
+		// renderer = null;
 		view.onPause();
-		
+
 		// readSocketThreadOdo.setStop(false);
 		handler.removeCallbacks(runnable);
 		stop_the_handler = true;
@@ -361,13 +362,10 @@ public class CameraActivity extends FragmentActivity {
 	}
 
 	private void display_image() {
-		
-			
-				
-			 String test = DataManager.getInstance().getPollFifoStringOdoPacket();
-			 txt_opengl.setText(test);
-			 
-		
+
+		String test = DataManager.getInstance().getPollFifoStringOdoPacket();
+		txt_opengl.setText(test);
+
 	}
 
 	@Override

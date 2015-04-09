@@ -1,7 +1,7 @@
 package com.naio.diagnostic.activities;
 
 import com.naio.diagnostic.R;
-import com.naio.diagnostic.utils.SettingsFragment;
+import com.naio.diagnostic.settings.SettingsFragment;
 
 import android.app.Activity;
 import android.os.Bundle;

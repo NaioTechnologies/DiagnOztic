@@ -1,7 +1,7 @@
-package com.naio.diagnostic.utils;
+package com.naio.diagnostic.views;
 
 import com.naio.diagnostic.threads.SendSocketThread;
-import com.naio.views.AnalogueView.OnMoveListener;
+import com.naio.diagnostic.views.AnalogueView.OnMoveListener;
 
 public class MyMoveListenerForAnalogueView implements OnMoveListener {
 	private SendSocketThread sendSocketThreadMotors;
@@ -16,8 +16,12 @@ public class MyMoveListenerForAnalogueView implements OnMoveListener {
 	public void sendMotorsCommand() {
 		synchronized (lock) {
 
-			byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0, 2,
-					left, right, 0, 0, 0, 0 };
+			byte[] b = new byte[] { 
+					78, 65, 73, 79, 48, 49,
+					1, 
+					0, 0, 0, 2,
+					left, right,
+					0, 0, 0, 0 };
 			sendSocketThreadMotors.setBytes(b);
 		}
 	}
@@ -115,7 +119,6 @@ public class MyMoveListenerForAnalogueView implements OnMoveListener {
 			}
 		}
 		synchronized (lock) {
-
 			left = xa;
 			right = ya;
 		}

@@ -1,8 +1,8 @@
 package com.naio.diagnostic.activities;
 
 import com.naio.diagnostic.R;
+import com.naio.diagnostic.settings.SettingsFragment;
 import com.naio.diagnostic.utils.Config;
-import com.naio.diagnostic.utils.SettingsFragment;
 
 import android.app.Activity;
 import android.app.ActivityManager;

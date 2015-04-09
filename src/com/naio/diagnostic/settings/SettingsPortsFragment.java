@@ -1,6 +1,7 @@
-package com.naio.diagnostic.utils;
+package com.naio.diagnostic.settings;
 
 import com.naio.diagnostic.R;
+import com.naio.diagnostic.utils.Config;
 
 import android.app.Fragment;
 import android.content.SharedPreferences;
@@ -25,22 +26,15 @@ public class SettingsPortsFragment extends PreferenceFragment {
 		EditTextPreference portGps = (EditTextPreference) findPreference("port_gps");
 		EditTextPreference portActuator = (EditTextPreference) findPreference("port_actuator");
 
-		SharedPreferences sharedPref = PreferenceManager
-				.getDefaultSharedPreferences(getActivity());
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-		portlog.setSummary(sharedPref.getString("port_log", ""
-				+ Config.PORT_LOG));
-		portMotors.setSummary(sharedPref.getString("port_motors", ""
-				+ Config.PORT_MOTORS));
-		portLidar.setSummary(sharedPref.getString("port_lidar", ""
-				+ Config.PORT_LIDAR));
-		portGps.setSummary(sharedPref.getString("port_gps", ""
-				+ Config.PORT_GPS));
-		portActuator.setSummary(sharedPref.getString("port_actuator", ""
-				+ Config.PORT_ACTUATOR));
+		portlog.setSummary(sharedPref.getString("port_log", ""+ Config.PORT_LOG));
+		portMotors.setSummary(sharedPref.getString("port_motors", ""+ Config.PORT_MOTORS));
+		portLidar.setSummary(sharedPref.getString("port_lidar", ""+ Config.PORT_LIDAR));
+		portGps.setSummary(sharedPref.getString("port_gps", ""+ Config.PORT_GPS));
+		portActuator.setSummary(sharedPref.getString("port_actuator", ""+ Config.PORT_ACTUATOR));
 
-		sharedPref
-				.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
+		sharedPref.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
 
 					@Override
 					public void onSharedPreferenceChanged(
