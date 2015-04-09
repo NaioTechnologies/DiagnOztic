@@ -2,7 +2,6 @@ package com.naio.diagnostic.threads;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import android.util.Log;
@@ -16,9 +15,9 @@ public class TriggeredThread extends Thread {
 	private final Object lock = new Object();
 	private NewMemoryBuffer memoryBuffer;
 	private NetClient netClient;
-	private SelectionKey key;
 	private ByteBuffer buffer;
 	private boolean read;
+	private byte[] bytes;
 
 	public TriggeredThread(NewMemoryBuffer memBuff, NetClient netClient) {
 		this.memoryBuffer = memBuff;
@@ -31,7 +30,6 @@ public class TriggeredThread extends Thread {
 		synchronized (lock) {
 			read = true;
 			lock.notify();
-
 		}
 	}
 
@@ -67,20 +65,19 @@ public class TriggeredThread extends Thread {
 						e.printStackTrace();
 					}
 				} else {
-					/*try {
+					try {
 						ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
 						int idx = 0;
 						byte[] buffarray = buffer.array();
 						for (byte bit : bytes) {
 							buffarray[idx++] = bit;
 						}
-						netClient.socketChannel.write(buffer);
+						client.write(buffer);
 						buffer.clear();
+						read = true;
 					} catch (IOException e) {
 						e.printStackTrace();
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}*/
+					} 
 				}
 			}
 		}
@@ -91,11 +88,12 @@ public class TriggeredThread extends Thread {
 		return netClient;
 	}
 
-	public void triggerWrite() {
-		/*synchronized (lock) {
-			read = true;
+	public void triggerWrite(byte[] bytesArray) {
+		synchronized (lock) {
+			read = false;
+			this.bytes = bytesArray;
 			lock.notify();
-		}*/
+		}
 	}
 
 }

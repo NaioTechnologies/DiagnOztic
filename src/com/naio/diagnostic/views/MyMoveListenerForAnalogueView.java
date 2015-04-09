@@ -1,16 +1,19 @@
 package com.naio.diagnostic.views;
 
+import com.naio.diagnostic.threads.SelectorThread;
 import com.naio.diagnostic.threads.SendSocketThread;
 import com.naio.diagnostic.views.AnalogueView.OnMoveListener;
 
 public class MyMoveListenerForAnalogueView implements OnMoveListener {
-	private SendSocketThread sendSocketThreadMotors;
+	private SelectorThread sendSocketThreadMotors;
 	private byte left;
 	private byte right;
+	private int index;
 	private static final Object lock = new Object();
 
-	public MyMoveListenerForAnalogueView(SendSocketThread sendSocketThreadMotors) {
+	public MyMoveListenerForAnalogueView(SelectorThread sendSocketThreadMotors, int idx) {
 		this.sendSocketThreadMotors = sendSocketThreadMotors;
+		this.index = idx;
 	}
 
 	public void sendMotorsCommand() {
@@ -22,7 +25,7 @@ public class MyMoveListenerForAnalogueView implements OnMoveListener {
 					0, 0, 0, 2,
 					left, right,
 					0, 0, 0, 0 };
-			sendSocketThreadMotors.setBytes(b);
+			sendSocketThreadMotors.setBytesToWriteForThread(b,index);
 		}
 	}
 

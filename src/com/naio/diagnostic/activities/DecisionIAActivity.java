@@ -1,7 +1,7 @@
 package com.naio.diagnostic.activities;
 
 import com.naio.diagnostic.R;
-import com.naio.diagnostic.threads.ReadSocketThread;
+import com.naio.diagnostic.threads.SelectorThread;
 import com.naio.diagnostic.trames.OdoTrame;
 import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.Config;
@@ -32,7 +32,7 @@ public class DecisionIAActivity extends FragmentActivity {
 
 	private TextView odo_display;
 	private NewMemoryBuffer memoryBufferOdo;
-	private ReadSocketThread readSocketThreadOdo;
+	private SelectorThread readSocketThreadOdo;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +48,8 @@ public class DecisionIAActivity extends FragmentActivity {
 
 		memoryBufferOdo = new NewMemoryBuffer();
 
-		readSocketThreadOdo = new ReadSocketThread(memoryBufferOdo,
-				Config.PORT_ODO);
+		readSocketThreadOdo = new SelectorThread(memoryBufferOdo,
+				Config.PORT_ODO,SelectorThread.READ);
 		readSocketThreadOdo.start();
 
 		handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);

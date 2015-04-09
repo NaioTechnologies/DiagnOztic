@@ -11,7 +11,7 @@ import com.naio.diagnostic.R;
 import com.naio.diagnostic.opengl.TextureRenderer;
 import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.threads.BitmapThread;
-import com.naio.diagnostic.threads.ReadSocketThread;
+import com.naio.diagnostic.threads.SelectorThread;
 
 import com.naio.diagnostic.trames.LogTrame;
 import com.naio.diagnostic.trames.OdoTrame;
@@ -74,12 +74,12 @@ public class CameraActivity extends FragmentActivity {
 	};
 
 	private NewMemoryBuffer memoryBufferLog;
-	private ReadSocketThread readSocketThreadLog;
+	private SelectorThread readSocketThreadLog;
 	private ImageView imageview;
 	private int nbrImage;
 	private ImageView imageview_r;
 	private NewMemoryBuffer memoryBufferOdo;
-	private ReadSocketThread readSocketThreadOdo;
+	private SelectorThread readSocketThreadOdo;
 	private TextView odo_display;
 	private ArrayList<float[]> arrayPoints = new ArrayList<float[]>();
 	private static float scaleX = 3.5f;
@@ -308,7 +308,7 @@ public class CameraActivity extends FragmentActivity {
 			memoryBufferLog = new NewMemoryBuffer();
 
 			// memoryBufferOdo = new NewMemoryBuffer();
-			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,	Config.PORT_LOG);
+			readSocketThreadLog = new SelectorThread(memoryBufferLog,Config.PORT_LOG,SelectorThread.READ);
 
 			bitmapThread = new BitmapThread(memoryBufferLog);
 
@@ -318,8 +318,7 @@ public class CameraActivity extends FragmentActivity {
 			 */
 
 			DataManager.getInstance().setPoints_position_oz("");
-			getWindow()
-					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 			readSocketThreadLog.start();
 			bitmapThread.start();

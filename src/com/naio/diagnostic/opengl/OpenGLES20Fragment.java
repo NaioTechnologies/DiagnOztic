@@ -1,7 +1,7 @@
 package com.naio.diagnostic.opengl;
 
 import com.naio.diagnostic.R;
-import com.naio.diagnostic.threads.ReadSocketThread;
+import com.naio.diagnostic.threads.SelectorThread;
 import com.naio.diagnostic.trames.LidarTrame;
 import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.Config;

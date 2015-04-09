@@ -22,32 +22,46 @@ import com.naio.diagnostic.utils.MemoryBuffer;
 import com.naio.diagnostic.utils.NewMemoryBuffer;
 import com.naio.net.NetClient;
 
-public class ReadSocketThread extends Thread {
+public class SelectorThread extends Thread {
 
 	private boolean stop;
 	private final Object lock1 = new Object();
 	private final Object lock2 = new Object();
+	public static final int READ = 0;
+	public static final int WRITE = 1;
+	public static final int READWRITE = 2;
 	private ByteBuffer buffer;
 	private Selector selector;
-	private TriggeredThread[] threadArray = new TriggeredThread[3];
+	private TriggeredThread[] threadArray = new TriggeredThread[10];
+	private int[] method = new int[10];
+	private boolean[] writeArray = new boolean[10];
+	private byte[][] bytesArray = new byte[10][];
+	
 	private int idx = 0;
 
-	public ReadSocketThread(MemoryBuffer memoryBuffer, int port) {
+	public SelectorThread(MemoryBuffer memoryBuffer, int port) {
 		this.stop = true;
 	}
 
-	public ReadSocketThread(NewMemoryBuffer memoryBuffer, int port) {
+	public SelectorThread(NewMemoryBuffer memoryBuffer, int port,int methodRead) {
 		this.stop = true;
-		idx = 0;
+		idx = -1;
 		buffer = ByteBuffer.allocate(Config.BUFFER_SIZE);
 		
-		addSocket(memoryBuffer,port);
+		addSocket(memoryBuffer,port,methodRead);
 	}
 
-	public void addSocket(NewMemoryBuffer mem, int port) {
+	public int addSocket(NewMemoryBuffer mem, int port,int methodRead) {
+		idx++;
 		NetClient netClient = new NetClient(Config.HOST, port, "0");
 		threadArray[idx] = new TriggeredThread(mem, netClient);
-		idx++;
+		if(methodRead == READ)
+			this.method[idx] = SelectionKey.OP_READ;
+		else if(methodRead == WRITE)
+			this.method[idx] = SelectionKey.OP_WRITE;
+		else if(methodRead == READWRITE)
+			this.method[idx] = SelectionKey.OP_READ |SelectionKey.OP_WRITE ;
+		return idx;
 	}
 
 	public void run() {
@@ -93,18 +107,21 @@ public class ReadSocketThread extends Thread {
 					int index = (int) key.attachment();
 					if (key.isAcceptable()) {
 
-						key.channel().register(selector, SelectionKey.OP_READ);
+						key.channel().register(selector, method[index]);
 
 					} else if (key.isConnectable()) {
 						// a connection was established with a remote server.
 
 					} else if (key.isReadable()) {
-						
+	
 						threadArray[index].triggerRead();
 						
 					} else if (key.isWritable()) {
-						// a channel is ready for writing
-						threadArray[index].triggerWrite();
+						if(writeArray[index]){
+							Log.e("selector", "thread writable :"+ index);
+							threadArray[index].triggerWrite(bytesArray[index]);
+							writeArray[index] = false;
+						}
 					}
 
 					keyIterator.remove();
@@ -131,6 +148,11 @@ public class ReadSocketThread extends Thread {
 				threadArray[i].interrupt();
 			}
 		}
-
+	}
+	
+	public void setBytesToWriteForThread(byte[] bytes, int idxThread){
+		Log.e("selector", "thread write :"+ idxThread);
+		bytesArray[idxThread] = bytes;
+		writeArray[idxThread] = true;
 	}
 }
