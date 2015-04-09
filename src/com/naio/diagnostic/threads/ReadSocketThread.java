@@ -9,6 +9,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Iterator;
@@ -23,45 +24,58 @@ import com.naio.net.NetClient;
 
 public class ReadSocketThread extends Thread {
 
-	private NetClient netClient;
 	private boolean stop;
 	private final Object lock1 = new Object();
 	private final Object lock2 = new Object();
-	private int port;
-	private NewMemoryBuffer newmemoryBuffer;
 	private ByteBuffer buffer;
+	private Selector selector;
+	private TriggeredThread[] threadArray = new TriggeredThread[3];
+	private int idx = 0;
 
 	public ReadSocketThread(MemoryBuffer memoryBuffer, int port) {
-		this.port = port;
 		this.stop = true;
 	}
 
 	public ReadSocketThread(NewMemoryBuffer memoryBuffer, int port) {
-		this.port = port;
-		this.newmemoryBuffer = memoryBuffer;
 		this.stop = true;
+		idx = 0;
 		buffer = ByteBuffer.allocate(Config.BUFFER_SIZE);
+		
+		addSocket(memoryBuffer,port);
+	}
+
+	public void addSocket(NewMemoryBuffer mem, int port) {
+		NetClient netClient = new NetClient(Config.HOST, port, "0");
+		threadArray[idx] = new TriggeredThread(mem, netClient);
+		idx++;
 	}
 
 	public void run() {
 		int charsRead = 0;
-
-		if (port == Config.PORT_LOG)
-			netClient = new NetClient(Config.HOST2, port, "0");
-		else
-			netClient = new NetClient(Config.HOST, port, "0");
-		netClient.connectWithServer();
-		Selector selector = null;
-
+		selector = null;
 		try {
 			selector = Selector.open();
-			SelectionKey key = netClient.socketChannel.register(selector,
-					SelectionKey.OP_READ);
-		} catch (ClosedChannelException e1) {
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
+		for(int i = 0; i < threadArray.length;i++){
+			if(threadArray[i] == null)
+				continue;
+			NetClient netClient = threadArray[i].getNetClient();
+			netClient.connectWithServer();
+			if (netClient.socketChannel.isConnected() == false) {
+				continue;
+			}
+			int ops = netClient.socketChannel.validOps();
+			SelectionKey keya;
+			try {
+				keya = netClient.socketChannel.register(selector, ops);
+				keya.attach(i);
+			} catch (ClosedChannelException e1) {
+				e1.printStackTrace();
+			}
+			threadArray[i].start();
 		}
 		try {
 			while (this.stop) {
@@ -76,48 +90,21 @@ public class ReadSocketThread extends Thread {
 				while (keyIterator.hasNext()) {
 
 					SelectionKey key = keyIterator.next();
-
+					int index = (int) key.attachment();
 					if (key.isAcceptable()) {
-						// a connection was accepted by a ServerSocketChannel.
+
+						key.channel().register(selector, SelectionKey.OP_READ);
 
 					} else if (key.isConnectable()) {
 						// a connection was established with a remote server.
 
 					} else if (key.isReadable()) {
-						if (netClient.socketChannel != null) {
-							if ((charsRead = netClient.socketChannel
-									.read(buffer)) > -1) {
-
-								if (charsRead > 0) {
-									Log.e("charsRead", "" + charsRead);
-									newmemoryBuffer.addToFifo(buffer.array(),
-											charsRead, buffer.arrayOffset());
-								}
-								buffer.clear();
-								if (!netClient.testConnection()) {
-									netClient.disConnectWithServer();
-									stop = false;
-								}
-
-							} else {
-								Log.e("states", "close");
-								if (!netClient.testConnection()) {
-									netClient.disConnectWithServer();
-									stop = false;
-								}
-
-							}
-						} else {
-							if (!netClient.testConnection()) {
-								netClient.disConnectWithServer();
-								stop = false;
-							}
-							// Log.e("socket", "pas de in");
-
-						}
-
+						
+						threadArray[index].triggerRead();
+						
 					} else if (key.isWritable()) {
 						// a channel is ready for writing
+						threadArray[index].triggerWrite();
 					}
 
 					keyIterator.remove();
@@ -128,7 +115,6 @@ public class ReadSocketThread extends Thread {
 
 			e.printStackTrace();
 		}
-		netClient.disConnectWithServer();
 
 	}
 
@@ -139,7 +125,11 @@ public class ReadSocketThread extends Thread {
 	public void setStop(boolean stop) {
 		synchronized (lock2) {
 			this.stop = stop;
-			netClient.disConnectWithServer();
+			for(int i = 0; i < threadArray.length;i++){
+				if(threadArray[i] == null)
+					continue;
+				threadArray[i].interrupt();
+			}
 		}
 
 	}

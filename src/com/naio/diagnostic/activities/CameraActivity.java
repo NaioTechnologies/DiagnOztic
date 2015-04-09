@@ -217,8 +217,8 @@ public class CameraActivity extends FragmentActivity {
 								float scale = newDist / oldDist;
 								Log.e("agabb", "--" + scale);
 								renderer.scale += (scale - 1) / 10;
-								if (renderer.scale >= 2.2f) {
-									renderer.scale = 2.2f;
+								if (renderer.scale >= 2.4f) {
+									renderer.scale = 2.4f;
 								}
 							}
 
@@ -308,8 +308,7 @@ public class CameraActivity extends FragmentActivity {
 			memoryBufferLog = new NewMemoryBuffer();
 
 			// memoryBufferOdo = new NewMemoryBuffer();
-			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,
-					Config.PORT_LOG);
+			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,	Config.PORT_LOG);
 
 			bitmapThread = new BitmapThread(memoryBufferLog);
 

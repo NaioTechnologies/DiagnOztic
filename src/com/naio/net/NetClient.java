@@ -43,8 +43,7 @@ public class NetClient {
 			if (socketChannel == null) {
 				socketChannel = SocketChannel.open();
 				socketChannel.configureBlocking(false);
-				socketChannel.connect(new InetSocketAddress(this.host,
-						this.port));
+				socketChannel.connect(new InetSocketAddress(this.host,this.port));
 				while (!socketChannel.finishConnect()) {
 					try {
 						Thread.sleep(10);

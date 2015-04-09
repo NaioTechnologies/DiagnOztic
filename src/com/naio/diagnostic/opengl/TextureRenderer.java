@@ -349,7 +349,7 @@ public class TextureRenderer implements GLSurfaceView.Renderer {
 		final float bottom = -1.0f;
 		final float top = 1.0f;
 		final float near = 1.0f;
-		final float far = 10.0f;
+		final float far = 50.0f;
 
 		Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near,
 				far);

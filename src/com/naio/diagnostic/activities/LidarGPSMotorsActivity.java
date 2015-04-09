@@ -125,10 +125,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			firstTimeDisplayTheMap = true;
 			
 			readSocketThreadMap = new ReadSocketThread(memoryBufferMap,	Config.PORT_GPS);
+			readSocketThreadMap.addSocket(memoryBufferLidar, Config.PORT_LIDAR);
+			readSocketThreadMap.addSocket(memoryBufferLog, Config.PORT_LOG);
+			/*readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,	Config.PORT_LIDAR);
 			
-			readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,	Config.PORT_LIDAR);
-			
-			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,	Config.PORT_LOG);
+			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,	Config.PORT_LOG);*/
 			
 			sendSocketThreadMotors = new SendSocketThread(Config.PORT_MOTORS);
 			
@@ -218,9 +219,9 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			});
 
 			// start the threads
-			readSocketThreadLidar.start();
+			//readSocketThreadLidar.start();
 			readSocketThreadMap.start();
-			readSocketThreadLog.start();
+			//readSocketThreadLog.start();
 			sendSocketThreadMotors.start();
 			sendSocketThreadActuators.start();
 
@@ -232,9 +233,9 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		DataManager.getInstance().write_in_file(this);
-		readSocketThreadLidar.setStop(false);
+		//readSocketThreadLidar.setStop(false);
 		readSocketThreadMap.setStop(false);
-		readSocketThreadLog.setStop(false);
+		//readSocketThreadLog.setStop(false);
 		sendSocketThreadMotors.setStop(false);
 		sendSocketThreadActuators.setStop(false);
 		handler.removeCallbacks(runnable);
