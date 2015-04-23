@@ -1,5 +1,9 @@
 package com.naio.diagnostic.utils;
 
+import java.text.Normalizer;
+
+import android.util.Log;
+
 public class GrayToChromadepth {
 	int[][] lookupTable = new int[255][3];
 
@@ -60,9 +64,21 @@ public class GrayToChromadepth {
 	}
 
 	public void getRGBFromZ(float z, int[] rgb) {
+		Log.e("norma","gfk " + z);
+		z = normalize(z,0.4f,10.0f,0.0f,255.0f);
+		Log.e("norma","gfghjk " + z);
 		rgb[0] = lookupTable[(int) z][0];
 		rgb[1] = lookupTable[(int) z][1];
 		rgb[2] = lookupTable[(int) z][2];
 
+	}
+
+	private float normalize(float z, float min, float max, float newMin, float newMax) {
+		if(z >= min && z <= max)
+			return (z-min)*(newMax - newMin)/(max - min)+newMin;
+		else if(z > max)
+			return 254;
+		else
+			return 0;
 	}
 }

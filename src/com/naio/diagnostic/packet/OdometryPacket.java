@@ -16,8 +16,9 @@ public class OdometryPacket extends BasePacket {
 
 	private PointTrame pointtrame = null;
 	private JPEGTrame jpegtrame = null;
-	private StringTrame stringtrame = null;
+	private StringTrame[] stringtrames = new StringTrame[4];
 	private LigneTrame linetrame = null;
+	
 
 	public OdometryPacket(byte[] data) {
 		super(data);
@@ -45,8 +46,8 @@ public class OdometryPacket extends BasePacket {
 	/**
 	 * @return the stringtrame
 	 */
-	public StringTrame getStringtrame() {
-		return stringtrame;
+	public StringTrame[] getStringtrames() {
+		return stringtrames;
 	}
 
 	/**
@@ -127,8 +128,11 @@ public class OdometryPacket extends BasePacket {
 				Log.e("stringtrame", "" + sizeString + "---");
 				if(sizeString > 200 || sizeString <2)
 					return this;
-				stringtrame = new StringTrame(Arrays.copyOfRange(data, offset,offset + sizeString));
-				offset += sizeString;
+				StringTrame stringtrame = new StringTrame(Arrays.copyOfRange(data, offset,offset + sizeString));
+				if(stringtrame.getId()<5){
+					stringtrames[stringtrame.getId()] = stringtrame;
+				}
+				offset += sizeString+1;
 				break;
 			default:
 				return this;

@@ -177,10 +177,10 @@ public class BitmapThread extends Thread {
 			DataManager.getInstance().offerfifoBitmap(mutableBitmap);
 			Log.e("thread", "offer so the end");
 
-			if (odoPacket.getStringtrame() == null)
+			if (odoPacket.getStringtrames() == null)
 				continue;
 
-			String test = odoPacket.getStringtrame().getText();
+			String test = odoPacket.getStringtrames()[0].getText();
 			DataManager.getInstance().offerStringOdoPacket(test);
 
 		}

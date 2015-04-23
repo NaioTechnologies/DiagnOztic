@@ -70,7 +70,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	private Handler handler = new Handler();
 	private GoogleMap map;
 	private MapView maporg;
-	private SelectorThread readSocketThreadMap;
+	private SelectorThread selectorThread;
 	private NewMemoryBuffer memoryBufferMap;
 	private boolean firstTimeDisplayTheMap;
 	private List<LatLng> listPointMap;
@@ -126,11 +126,11 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			listPointMapView = new ArrayList<GeoPoint>();
 			firstTimeDisplayTheMap = true;
 			
-			readSocketThreadMap = new SelectorThread(memoryBufferMap,	Config.PORT_GPS,SelectorThread.READ);
-			readSocketThreadMap.addSocket(memoryBufferLidar, Config.PORT_LIDAR,SelectorThread.READ);
-			readSocketThreadMap.addSocket(memoryBufferLog, Config.PORT_LOG,SelectorThread.READ);
-			idxMotor = readSocketThreadMap.addSocket(null, Config.PORT_MOTORS, SelectorThread.WRITE);
-			idxActuator = readSocketThreadMap.addSocket(null, Config.PORT_ACTUATOR, SelectorThread.WRITE);
+			selectorThread = new SelectorThread(memoryBufferMap,	Config.PORT_GPS,SelectorThread.READ);
+			selectorThread.addSocket(memoryBufferLidar, Config.PORT_LIDAR,SelectorThread.READ);
+			selectorThread.addSocket(memoryBufferLog, Config.PORT_LOG,SelectorThread.READ);
+			idxMotor = selectorThread.addSocket(null, Config.PORT_MOTORS, SelectorThread.WRITE);
+			idxActuator = selectorThread.addSocket(null, Config.PORT_ACTUATOR, SelectorThread.WRITE);
 			/*readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,	Config.PORT_LIDAR);
 			
 			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,	Config.PORT_LOG);
@@ -224,7 +224,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 
 			// start the threads
 			//readSocketThreadLidar.start();
-			readSocketThreadMap.start();
+			selectorThread.start();
 			//readSocketThreadLog.start();
 	//		sendSocketThreadMotors.start();
 //			sendSocketThreadActuators.start();
@@ -238,7 +238,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 		super.onBackPressed();
 		DataManager.getInstance().write_in_file(this);
 		//readSocketThreadLidar.setStop(false);
-		readSocketThreadMap.setStop(false);
+		selectorThread.setStop(false);
 		//readSocketThreadLog.setStop(false);
 		//sendSocketThreadMotors.setStop(false);
 		//sendSocketThreadActuators.setStop(false);
@@ -348,7 +348,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 				Gravity.CENTER));
 		analView.setRADIUS(heightTab / 12);
 		analView.setOnMoveListener(new MyMoveListenerForAnalogueView(
-				readSocketThreadMap,idxMotor));
+				selectorThread,idxMotor));
 	}
 
 	private void set_the_dpadView() {
@@ -392,7 +392,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 							1, 0, 0, 0, 2, 
 							-127, -127, 
 							0, 0, 0, 0 };
-					readSocketThreadMap.setBytesToWriteForThread(b, idxMotor);
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -429,7 +429,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 							1, 0, 0, 0,	2, 
 							127, 127, 
 							0, 0, 0, 0 };
-					readSocketThreadMap.setBytesToWriteForThread(b, idxMotor);
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -466,7 +466,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 							1, 0, 0, 0,	2,
 							-127, 127,
 							0, 0, 0, 0 };
-					readSocketThreadMap.setBytesToWriteForThread(b, idxMotor);
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -503,7 +503,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 							1, 0, 0, 0,	2, 
 							127, -127, 
 							0, 0, 0, 0 };
-					readSocketThreadMap.setBytesToWriteForThread(b, idxMotor);
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -551,7 +551,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					readSocketThreadMap.setBytesToWriteForThread(byteDown, idxActuator);
+					selectorThread.setBytesToWriteForThread(byteDown, idxActuator);
 					break;
 				case MotionEvent.ACTION_UP:
 					break;
@@ -574,7 +574,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					readSocketThreadMap.setBytesToWriteForThread(byteDown, idxActuator);
+					selectorThread.setBytesToWriteForThread(byteDown, idxActuator);
 					break;
 				case MotionEvent.ACTION_UP:
 					break;

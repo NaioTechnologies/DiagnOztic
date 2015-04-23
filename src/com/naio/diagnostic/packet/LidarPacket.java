@@ -32,7 +32,7 @@ public class LidarPacket extends BasePacket{
 								data[offset+5]}
 						).getInt(0);
 				pointtrame = new PointTrame(data,offset);
-				offset+=nbrPoints*Config.POINTS3D_SIZE_IN_BYTES + 6;
+				offset+=nbrPoints*pointtrame.getSizeBytePerPoint() + 6;
 				break;
 			case LINES:
 				offset++;

@@ -74,7 +74,7 @@ public class CameraActivity extends FragmentActivity {
 	};
 
 	private NewMemoryBuffer memoryBufferLog;
-	private SelectorThread readSocketThreadLog;
+	private SelectorThread selectorThread;
 	private ImageView imageview;
 	private int nbrImage;
 	private ImageView imageview_r;
@@ -308,7 +308,7 @@ public class CameraActivity extends FragmentActivity {
 			memoryBufferLog = new NewMemoryBuffer();
 
 			// memoryBufferOdo = new NewMemoryBuffer();
-			readSocketThreadLog = new SelectorThread(memoryBufferLog,Config.PORT_LOG,SelectorThread.READ);
+			selectorThread = new SelectorThread(memoryBufferLog,Config.PORT_LOG,SelectorThread.READ);
 
 			bitmapThread = new BitmapThread(memoryBufferLog);
 
@@ -320,7 +320,7 @@ public class CameraActivity extends FragmentActivity {
 			DataManager.getInstance().setPoints_position_oz("");
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-			readSocketThreadLog.start();
+			selectorThread.start();
 			bitmapThread.start();
 			// readSocketThreadOdo.start();
 
@@ -332,7 +332,7 @@ public class CameraActivity extends FragmentActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		// DataManager.getInstance().write_in_file(this);
-		readSocketThreadLog.setStop(false);
+		selectorThread.setStop(false);
 		bitmapThread.quit();
 		// renderer = null;
 		view.onPause();
