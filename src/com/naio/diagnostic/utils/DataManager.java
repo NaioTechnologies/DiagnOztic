@@ -11,7 +11,10 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import net.sourceforge.juint.UInt16;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -32,7 +35,7 @@ public class DataManager {
 	private ConcurrentLinkedQueue<Bitmap> fifoBitmap = new ConcurrentLinkedQueue<Bitmap>();
 	private ByteBuffer buffer;
 	public static final Object lock2 = new Object();
-	private ConcurrentLinkedQueue<String> fifoStringOdoPacket = new ConcurrentLinkedQueue<String>();
+	private ConcurrentLinkedQueue<String[]> fifoStringOdoPacket = new ConcurrentLinkedQueue<String[]>();
 
 	private static DataManager instance;
 
@@ -240,11 +243,11 @@ public class DataManager {
 		}
 	}
 
-	public void offerStringOdoPacket(String test) {
+	public void offerStringOdoPacket(String[] test) {
 		synchronized (lock2) {
 
 			for (int i = 0; i < fifoStringOdoPacket.size(); i++) {
-				String b = fifoStringOdoPacket.poll();
+				String[] b = fifoStringOdoPacket.poll();
 				b = null;
 
 			}
@@ -254,7 +257,7 @@ public class DataManager {
 
 	}
 	
-	public String getPollFifoStringOdoPacket(){
+	public String[] getPollFifoStringOdoPacket(){
 		synchronized (lock2) {
 			
 		try {
@@ -263,12 +266,22 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		if(fifoStringOdoPacket.size() == 0)
-			return "";
+			return null;
 		for (int i = 0; i < fifoStringOdoPacket.size() - 1; i++) {
 			fifoStringOdoPacket.poll();
 		}
 		return fifoStringOdoPacket.peek();
 		}
+	}
+	
+	public static UInt16[] convertUint16Array(List<UInt16> integers)
+	{
+		UInt16[] ret = new UInt16[integers.size()];
+	    for (int i=0; i < ret.length; i++)
+	    {
+	        ret[i] = integers.get(i);
+	    }
+	    return ret;
 	}
 
 }

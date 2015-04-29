@@ -6,28 +6,16 @@ import java.util.ArrayList;
 
 import android.util.Log;
 
+import com.naio.diagnostic.packet.OdometryPacket;
 import com.naio.diagnostic.utils.Config;
 
 public class PointTrame extends Trame {
 
-	private final int INT8 = 0;
-	private final int UINT8 = 1;
-	private final int INT16 = 2;
-	private final int UINT16 = 3;
-	private final int INT32 = 4;
-	private final int UINT32 = 5;
-	private final int INT64 = 6;
-	private final int UINT64 = 7;
-	private final int FLOAT32 = 8;
-	private final int FLOAT64 = 9;
-
-	private byte type; // 0 ou 1 ( int or float )
 	private int nbrPoints;
 	private ArrayList<float[]> arrayListPoints3DFloat = null;
 	private ArrayList<int[]> arrayListPoints3DInt = null;
-	private byte dimension;
 	private ArrayList<double[]> arrayListPoints3DDouble = null;
-	private ArrayList<UInt16> arrayListPoints1DUInt16;
+	private ArrayList<UInt16> arrayListPoints1DUInt16 = null;
 	public final static Object lock = new Object();
 
 	public PointTrame(byte[] data, int offsetParam) {
@@ -61,7 +49,9 @@ public class PointTrame extends Trame {
 	 * @return the arrayListPoints1DUInt16
 	 */
 	public ArrayList<UInt16> getArrayListPoints1DUInt16() {
+		synchronized (lock) {
 		return arrayListPoints1DUInt16;
+		}
 	}
 
 	/**
@@ -71,54 +61,9 @@ public class PointTrame extends Trame {
 		return arrayListPoints3DInt;
 	}
 
-	public int getSizeBytePerPoint() {
-		int nbr1 = 0, nbr2 = 0;
-		switch (type) {
-		case INT8:
-		case UINT8:
-			nbr1 = 1;
-			break;
-		case INT16:
-		case UINT16:
-			nbr1 = 2;
-			break;
-		case INT32:
-		case UINT32:
-			nbr1 = 4;
-			break;
-		case INT64:
-		case UINT64:
-			nbr1 = 8;
-			break;
-		case FLOAT32:
-			nbr1 = 4;
-			break;
-		case FLOAT64:
-			nbr1 = 8;
-			break;
-		default:
-			break;
-		}
-		switch (dimension) {
-		case 1:
-			nbr2 = 1;
-			break;
-		case 2:
-			nbr2 = 2;
-			break;
-		case 3:
-			nbr2 = 3;
-			break;
-		default:
-			break;
-		}
-		return nbr1 * nbr2;
-
-	}
-
 	public void setBytes(byte[] data, int offsetParam) {
 		int offset = offsetParam;
-		type = data[offset++];// float32
+		type = data[offset++];// float32,uint16
 		dimension = data[offset++]; // 2d,3d
 		nbrPoints = ByteBuffer.wrap(
 				new byte[] { data[offset], data[offset + 1], data[offset + 2],
@@ -133,9 +78,12 @@ public class PointTrame extends Trame {
 			} else if (type == FLOAT64) {
 				arrayListPoints3DDouble = new ArrayList<double[]>();
 			} else if( type == UINT16){
+				Log.e("valueOPif","OK");
 				arrayListPoints1DUInt16 = new ArrayList<UInt16>();
 			}
 
+			Log.e("valueOPif","nbr point : "+nbrPoints+"hum :" +(data.length - offsetParam)+" compare to : "+ (6 + nbrPoints
+					* getSizeBytePerPoint()) );
 			if (data.length - offsetParam >= 6 + nbrPoints
 					* getSizeBytePerPoint()) {
 				if (type == FLOAT64 || type == INT64 || type == UINT64) {
@@ -180,17 +128,20 @@ public class PointTrame extends Trame {
 						}
 					}
 				} else if (type == UINT16){
+					Log.e("valueOPif","allo");
 					for (int i = 0; i < nbrPoints; i++) {
 						byte[] point1d_x = new byte[] {  
-								data[offset + 1],
-								data[offset] };
+								data[offset],
+								data[offset +1] };
 
 						offset = offset + getSizeBytePerPoint();
-						if (type == UINT16) {
+						//if (type == UINT16) {
 							UInt16 point3d = UInt16.valueOfBigEndian(point1d_x);
+							//Log.e("valueOPif","un uint16 : "+ point3d.intValue());
 							arrayListPoints1DUInt16.add(point3d);
-						}
+						//}
 					}
+					
 				} else{
 					for (int i = 0; i < nbrPoints; i++) {
 						byte[] point3d_x = new byte[] { 

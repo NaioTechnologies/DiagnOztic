@@ -88,22 +88,17 @@ public class CameraActivity extends FragmentActivity {
 	private float rapScaleY;
 
 	private SimplePlane plane;
-
 	private TextureRenderer renderer;
-
 	private ArrayList<float[]> arrayPoints3d = new ArrayList<float[]>();
-
 	private TextView txt_opengl;
-
 	private boolean stop_the_handler;
-
 	private OdometryPacket ancienPacket = null;
-
 	private byte[] oldPollFifo = null;
-
 	private BitmapThread bitmapThread;
-
 	private GLSurfaceView view;
+	private TextView txt_opengl2;
+	private TextView txt_opengl3;
+	private TextView txt_opengl4;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +125,10 @@ public class CameraActivity extends FragmentActivity {
 		renderer = new TextureRenderer(this);
 		view.setEGLContextClientVersion(2);
 		view.setRenderer(renderer);
-		txt_opengl = (TextView) findViewById(R.id.text_image);
+		txt_opengl = (TextView) findViewById(R.id.text_image_1);
+		txt_opengl2 = (TextView) findViewById(R.id.text_image_2);
+		txt_opengl3 = (TextView) findViewById(R.id.text_image_3);
+		txt_opengl4 = (TextView) findViewById(R.id.text_image_4);
 		stop_the_handler = false;
 		final DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -344,26 +342,20 @@ public class CameraActivity extends FragmentActivity {
 	}
 
 	private void read_the_queue() {
-		display_image();
+		display_text();
 		// display_odo();
 		if (!stop_the_handler)
 			handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 	}
 
-	private void display_odo() {
-		OdoTrame odo = (OdoTrame) trameDecoder.decode(memoryBufferOdo
-				.getPollFifo());
-		if (odo != null) {
-			odo_display.setText(odo.show());
-		}
 
-	}
-
-	private void display_image() {
-
-		String test = DataManager.getInstance().getPollFifoStringOdoPacket();
-		txt_opengl.setText(test);
-
+	private void display_text() {
+		String[] test = DataManager.getInstance().getPollFifoStringOdoPacket();
+		if(test != null){
+		txt_opengl.setText(test[0]);
+		txt_opengl2.setText(test[1]);
+		txt_opengl3.setText(test[2]);
+		txt_opengl4.setText(test[3]);}
 	}
 
 	@Override

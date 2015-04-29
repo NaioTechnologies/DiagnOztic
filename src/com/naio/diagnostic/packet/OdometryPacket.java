@@ -113,7 +113,7 @@ public class OdometryPacket extends BasePacket {
 					linetrame = new LigneTrame(data, offset);
 				else
 					linetrame.setBytes(data, offset);
-				offset += nbrLines * Config.POINTS3D_SIZE_IN_BYTES * 2 + 6;
+				offset += nbrLines * linetrame.getSizeBytePerPoint() * 2 + 6;
 				break;
 			case STRING:
 				offset++;

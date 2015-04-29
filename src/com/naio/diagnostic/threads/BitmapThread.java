@@ -3,6 +3,7 @@ package com.naio.diagnostic.threads;
 import java.util.ArrayList;
 
 import com.naio.diagnostic.packet.OdometryPacket;
+import com.naio.diagnostic.trames.StringTrame;
 import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.DataManager;
 import com.naio.diagnostic.utils.GrayToChromadepth;
@@ -75,8 +76,8 @@ public class BitmapThread extends Thread {
 				continue;
 			}
 			oldPollFifo = pollFifo;
-			OdometryPacket odoPacket = (OdometryPacket) trameDecoder
-					.decode(pollFifo);
+			trameDecoder.decode(pollFifo);
+					OdometryPacket odoPacket = trameDecoder.getOdometryPacket();
 			Log.e("notify", "decode the fifo in bitmap thread");
 			if (odoPacket == null)
 				continue;
@@ -180,7 +181,12 @@ public class BitmapThread extends Thread {
 			if (odoPacket.getStringtrames() == null)
 				continue;
 
-			String test = odoPacket.getStringtrames()[0].getText();
+			StringTrame[] testa = odoPacket.getStringtrames();
+			String[] test = new String[4];
+			int idx = 0;
+			for(StringTrame t : testa){
+				test[idx++] = t.getText();
+			}
 			DataManager.getInstance().offerStringOdoPacket(test);
 
 		}

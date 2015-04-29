@@ -166,6 +166,15 @@ public class NewMemoryBuffer {
 		case (byte) Config.ID_ODO_PACKET:
 			maxPacketLenght = 10000000;
 			break;
+		case (byte) Config.ID_LIDAR_PACKET:
+			maxPacketLenght = 10000000;
+			break;
+		case (byte) Config.ID_STRING_PACKET:
+			maxPacketLenght = 10000000;
+			break;
+		case (byte) Config.ID_GPS_PACKET:
+			maxPacketLenght = 10000000;
+			break;
 		/*
 		 * case (byte)PacketIds.WatchDogPacketId: maxPacketLenght = (uint)32;
 		 * break;

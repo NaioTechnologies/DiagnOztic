@@ -88,6 +88,8 @@ public class Config {
 	public static final int ID_SMS = 17;
 	public static final int ID_ODO_PACKET = 18;
 	public static final int ID_LIDAR_PACKET = 19;
+	public static final int ID_STRING_PACKET = 20;
+	public static final int ID_GPS_PACKET = 21;
 
 	public static final int BUFFER_SIZE = 4096;
 

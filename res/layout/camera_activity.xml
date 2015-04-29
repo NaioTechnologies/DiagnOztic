@@ -28,10 +28,34 @@
         android:layout_height="fill_parent" />
 
     <TextView
-        android:id="@+id/text_image"
+        android:id="@+id/text_image_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:text=" "
+        android:textColor="@color/wallet_holo_blue_light"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/text_image_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/text_image_1"
+        android:text=" "
+        android:textColor="@color/wallet_holo_blue_light"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/text_image_3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/text_image_2"
+        android:text=" "
+        android:textColor="@color/wallet_holo_blue_light"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/text_image_4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/text_image_3"
         android:text=" "
         android:textColor="@color/wallet_holo_blue_light"
         android:textSize="20dp" />

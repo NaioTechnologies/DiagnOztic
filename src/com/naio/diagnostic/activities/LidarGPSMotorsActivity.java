@@ -28,6 +28,7 @@ import com.naio.diagnostic.threads.SendSocketThread;
 import com.naio.diagnostic.trames.GPSTrame;
 import com.naio.diagnostic.trames.LidarTrame;
 import com.naio.diagnostic.trames.LogTrame;
+import com.naio.diagnostic.trames.StringTrame;
 import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.Config;
 import com.naio.diagnostic.utils.DataManager;
@@ -39,6 +40,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,7 +68,6 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	private OpenGLES20Fragment openglfragment;
 	private TrameDecoder trameDecoder;
 	private NewMemoryBuffer memoryBufferLidar;
-	private SelectorThread readSocketThreadLidar;
 	private Handler handler = new Handler();
 	private GoogleMap map;
 	private MapView maporg;
@@ -82,20 +83,26 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 
 	private NewMemoryBuffer memoryBufferLog;
 	private SelectorThread readSocketThreadLog;
-
 	private MapView mapView;
-
 	private MyLocationNewOverlay mMyLocationOverlay;
-
 	private ItemizedIconOverlay<OverlayItem> currentLocationOverlay;
-
 	private ResourceProxyImpl resProxyImpl;
-
 	private ArrayList<GeoPoint> listPointMapView;
-
 	private int idxActuator;
-
 	private int idxMotor;
+
+	private TextView txtLidar1;
+	private TextView txtLidar2;
+	private TextView txtLidar3;
+	private TextView txtLidar4;
+	private TextView txtLidar5;
+	private TextView txtLidar6;
+	private TextView txtLidar7;
+	private TextView txtLidar8;
+	private TextView txtLidar9;
+	private TextView txtLidar10;
+	private TextView txtLidar11;
+	private TextView txtLidar12;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -125,10 +132,25 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			listPointMap = new ArrayList<LatLng>();
 			listPointMapView = new ArrayList<GeoPoint>();
 			firstTimeDisplayTheMap = true;
+			txtLidar1 = (TextView) findViewById(R.id.txt_lidar_1);
+			txtLidar2 = (TextView) findViewById(R.id.txt_lidar_2);
+			txtLidar3 = (TextView) findViewById(R.id.txt_lidar_3);
+			txtLidar4 = (TextView) findViewById(R.id.txt_lidar_4);
+			txtLidar5 = (TextView) findViewById(R.id.txt_lidar_5);
+			txtLidar6 = (TextView) findViewById(R.id.txt_lidar_6);
+			txtLidar7 = (TextView) findViewById(R.id.txt_lidar_7);
+			txtLidar8 = (TextView) findViewById(R.id.txt_lidar_8);
+			txtLidar9 = (TextView) findViewById(R.id.txt_lidar_9);
+			txtLidar10 = (TextView) findViewById(R.id.txt_lidar_10);
+			txtLidar11 = (TextView) findViewById(R.id.txt_lidar_11);
+			txtLidar12 = (TextView) findViewById(R.id.txt_lidar_12);
 			
-			selectorThread = new SelectorThread(memoryBufferMap,	Config.PORT_GPS,SelectorThread.READ);
+			selectorThread = new SelectorThread(memoryBufferMap,Config.PORT_GPS,SelectorThread.READ);
 			selectorThread.addSocket(memoryBufferLidar, Config.PORT_LIDAR,SelectorThread.READ);
 			selectorThread.addSocket(memoryBufferLog, Config.PORT_LOG,SelectorThread.READ);
+			//TODO : change for this :
+			//selectorThread.addSocket(memoryBufferLog, Config.PORT_LOG,SelectorThread.READ);
+			 
 			idxMotor = selectorThread.addSocket(null, Config.PORT_MOTORS, SelectorThread.WRITE);
 			idxActuator = selectorThread.addSocket(null, Config.PORT_ACTUATOR, SelectorThread.WRITE);
 			/*readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,	Config.PORT_LIDAR);
@@ -249,14 +271,49 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 		display_lidar_info();
 		display_gps_info();
 		display_lidar_lines();
+		display_txt();
 		handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 	}
 
-	private void display_gps_info() {
-		GPSTrame gps = (GPSTrame) trameDecoder.decode(memoryBufferMap
-				.getPollFifo());
+	private void display_txt() {
+		trameDecoder.decode(memoryBufferLog.getPollFifo());
+		StringTrame[] strTr = trameDecoder.getStringPacket().getStringtrames();
+		if(strTr[0] != null)
+			txtLidar1.setText(strTr[0].getText());
+		if(strTr[1] != null)
+			txtLidar2.setText(strTr[1].getText());
+		if(strTr[2] != null)
+			txtLidar3.setText(strTr[2].getText());
+		if(strTr[3] != null)
+			txtLidar4.setText(strTr[3].getText());
+		if(strTr[4] != null)
+			txtLidar5.setText(strTr[4].getText());
+		if(strTr[5] != null)
+			txtLidar6.setText(strTr[5].getText());
+		if(strTr[6] != null)
+			txtLidar7.setText(strTr[6].getText());
+		if(strTr[7] != null)
+			txtLidar8.setText(strTr[7].getText());
+		if(strTr[8] != null)
+			txtLidar9.setText(strTr[8].getText());
+		if(strTr[9] != null)
+			txtLidar10.setText(strTr[9].getText());
+		if(strTr[10] != null)
+			txtLidar11.setText(strTr[10].getText());
+		if(strTr[11] != null)
+			txtLidar12.setText(strTr[11].getText());
+		
+	}
 
-		if (gps != null) {
+	private void display_gps_info() {
+		/*GPSTrame gps = (GPSTrame) trameDecoder.decode(memoryBufferMap
+				.getPollFifo());*/
+		//TODO: change for this :
+		trameDecoder.decode(memoryBufferLog.getPollFifo());
+		if( trameDecoder.getGpsPacket() != null){
+		Log.e("gps","gps values :" + trameDecoder.getGpsPacket().getLat()+"   "+ trameDecoder.getGpsPacket().getLon() +"   "+ trameDecoder.getGpsPacket().getAlt());}
+
+		/*if (gps != null) {
 			DecimalFormat df = new DecimalFormat("####.##");
 			TextView altitude = (TextView) findViewById(R.id.textview_altitude);
 			altitude.setText("Altitude:" + df.format(gps.getAlt()) + " m");
@@ -265,7 +322,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 					+ " km/h");
 			DataManager.getInstance().write_in_log(
 					"alt and vitesse : " + gps.getAlt() + "---"
-							+ gps.getGroundSpeed() + "\n");
+							+ gps.getGroundSpeed() + "\n");*/
 			/*
 			 * map.clear(); LatLng latlng = new LatLng(gps.getLat(),
 			 * gps.getLon()); PolylineOptions option = new
@@ -316,28 +373,39 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			 * mapView.getOverlays().add(roadOverlay);
 			 */
 			//mapView.invalidate();
-		}
+		//}
 	}
 
 	private void display_lidar_info() {
 		
-		LidarTrame lidar = (LidarTrame) trameDecoder.decode(memoryBufferLidar
-				.getPollFifo());
-		if (lidar != null) {
+		//LidarTrame lidar = (LidarTrame) trameDecoder.decode(memoryBufferLidar
+				//.getPollFifo());
+		
+		//TODO : change for this :
+		 trameDecoder.decode(memoryBufferLog.getPollFifo());
+		
+		//if (lidar != null) {
+			//TODO : change for this :
+			if( trameDecoder.getLidarPacket().getPointtrame() != null){
+				if(!trameDecoder.getLidarPacket().getPointtrame().getArrayListPoints1DUInt16().isEmpty()){
+			// replace lidar.data_uint16()
 			((MyGLSurfaceView) openglfragment.getView())
-					.update_with_uint16(lidar.data_uint16());
-		}
+					.update_with_uint16( DataManager.convertUint16Array(trameDecoder.getLidarPacket().getPointtrame().getArrayListPoints1DUInt16()));
+				}
+			}
+		//}
 		
 	}
 
 	private void display_lidar_lines() {
 
-		LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog
-				.getPollFifo());
-		if (log != null) {
+		//LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog.getPollFifo());
+		//TODO : change for this :
+		 trameDecoder.decode(memoryBufferLog.getPollFifo());
+		/*if (log != null) {
 			if (log.getType() == 1)
 				((MyGLSurfaceView) openglfragment.getView()).update_line();
-		}
+		}*/
 	}
 
 	private void set_the_analogueView() {
