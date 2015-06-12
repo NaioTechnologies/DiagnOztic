@@ -67,13 +67,14 @@
             android:screenOrientation="landscape" >
         </activity>
 
+      
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyBALS6r9dqKzBwTGVFrTw4Ul9GxWEE439M" />
-        <meta-data
+         <meta-data
             android:name="com.google.android.gms.version"
             android:value="7095000" />
-        <meta-data
+         <meta-data
             android:name="BING_KEY"
             android:value="AgE0qZYVDft7M0LkvJwNRt4vunN7maqhWzS81AmlM6Jq7JxmjxIko905Cz4X8cxA" />
     </application>

@@ -51,7 +51,6 @@ public class TriggeredThread extends Thread {
 						if ((charsRead = client.read(buffer)) > -1) {
 
 							if (charsRead > 0) {
-								Log.e("charsRead", "" + charsRead);
 								memoryBuffer.addToFifo(buffer.array(),
 										charsRead, buffer.arrayOffset());
 							}

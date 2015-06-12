@@ -78,7 +78,7 @@ public class PointTrame extends Trame {
 			} else if (type == FLOAT64) {
 				arrayListPoints3DDouble = new ArrayList<double[]>();
 			} else if( type == UINT16){
-				Log.e("valueOPif","OK");
+				Log.e("lidar","lidar  in pointtrame");
 				arrayListPoints1DUInt16 = new ArrayList<UInt16>();
 			}
 

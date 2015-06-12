@@ -73,6 +73,8 @@ public class OdometryPacket extends BasePacket {
 						).getInt(0);
 				Log.e("sizejpeg", "" + sizeJpeg);
 				offset += 4;
+				if(sizeJpeg <2 || sizeJpeg > 10000000)
+					return this;
 				if (jpegtrame == null)
 					jpegtrame = new JPEGTrame(Arrays.copyOfRange(data, offset,offset + sizeJpeg));
 				else
@@ -128,7 +130,7 @@ public class OdometryPacket extends BasePacket {
 				Log.e("stringtrame", "" + sizeString + "---");
 				if(sizeString > 200 || sizeString <2)
 					return this;
-				StringTrame stringtrame = new StringTrame(Arrays.copyOfRange(data, offset,offset + sizeString));
+				StringTrame stringtrame = new StringTrame(Arrays.copyOfRange(data, offset,offset + sizeString+1));
 				if(stringtrame.getId()<5){
 					stringtrames[stringtrame.getId()] = stringtrame;
 				}

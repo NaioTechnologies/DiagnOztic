@@ -6,11 +6,11 @@ import android.preference.PreferenceManager;
 
 public class Config {
 
-	public static final String HOST_FINAL = "192.168.1.149";// "10.42.0.1";//debian/*"192.168.1.110";//joan*///"192.168.1.149";//moi//
-	public static final String HOST2_FINAL = "192.168.1.149";
+	public static final String HOST_FINAL = "192.168.42.1";// "10.42.0.1";//debian/*"192.168.1.110";//joan*///"192.168.1.149";//moi//
+	public static final String HOST2_FINAL = "192.168.42.1";
 
-	public static String HOST = "192.168.1.149";
-	public static String HOST2 = "192.168.1.149";
+	public static String HOST = "192.168.42.1";
+	public static String HOST2 = "192.168.42.1";
 
 	public static final int PORT_GPS_FINAL = 3334;
 	public static final int PORT_LIDAR_FINAL = 3337;

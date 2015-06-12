@@ -77,7 +77,7 @@ public class BitmapThread extends Thread {
 			}
 			oldPollFifo = pollFifo;
 			trameDecoder.decode(pollFifo);
-					OdometryPacket odoPacket = trameDecoder.getOdometryPacket();
+			OdometryPacket odoPacket = trameDecoder.getOdometryPacket();
 			Log.e("notify", "decode the fifo in bitmap thread");
 			if (odoPacket == null)
 				continue;
@@ -185,7 +185,9 @@ public class BitmapThread extends Thread {
 			String[] test = new String[4];
 			int idx = 0;
 			for(StringTrame t : testa){
-				test[idx++] = t.getText();
+				if( t != null){
+					test[idx++] = t.getText();
+				}
 			}
 			DataManager.getInstance().offerStringOdoPacket(test);
 

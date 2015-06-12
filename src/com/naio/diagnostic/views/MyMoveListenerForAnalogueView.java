@@ -1,5 +1,7 @@
 package com.naio.diagnostic.views;
 
+import android.util.Log;
+
 import com.naio.diagnostic.threads.SelectorThread;
 import com.naio.diagnostic.threads.SendSocketThread;
 import com.naio.diagnostic.views.AnalogueView.OnMoveListener;
@@ -31,7 +33,8 @@ public class MyMoveListenerForAnalogueView implements OnMoveListener {
 
 	@Override
 	public void onMaxMoveInDirection(int padDiff, int padSpeed) {
-		int bearing = padDiff * 127 / 180;
+		Log.e("ghjk",padDiff +"-----"+ padSpeed);
+		/*int bearing = padDiff * 127 / 180;
 		byte xa = 0;
 		byte ya = 0;
 		if (padSpeed >= 0) {
@@ -75,13 +78,18 @@ public class MyMoveListenerForAnalogueView implements OnMoveListener {
 
 			left = xa;
 			right = ya;
+		}
+*/	synchronized (lock) {
+
+	left =(byte) padDiff;
+	right = (byte)padSpeed;
 		}
 
 	}
 
 	@Override
 	public void onHalfMoveInDirection(int padDiff, int padSpeed) {
-		int bearing = padDiff * 127 / 180;
+		/*int bearing = padDiff * 127 / 180;
 		byte xa = 0;
 		byte ya = 0;
 		if (padSpeed >= 0) {
@@ -124,7 +132,13 @@ public class MyMoveListenerForAnalogueView implements OnMoveListener {
 		synchronized (lock) {
 			left = xa;
 			right = ya;
-		}
+		}*/
+		
+		synchronized (lock) {
+
+			left =(byte) padDiff;
+			right = (byte)padSpeed;
+				}
 
 	}
 

@@ -63,7 +63,7 @@ import android.widget.TextView;
  * 
  */
 public class LidarGPSMotorsActivity extends FragmentActivity {
-	private static final int MILLISECONDS_RUNNABLE = 0; // 64 for 15fps
+	private static final int MILLISECONDS_RUNNABLE = 64; // 64 for 15fps
 
 	private OpenGLES20Fragment openglfragment;
 	private TrameDecoder trameDecoder;
@@ -77,7 +77,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	private List<LatLng> listPointMap;
 	Runnable runnable = new Runnable() {
 		public void run() {
-			read_the_queue();
+			display_txt_handler();
 		}
 	};
 
@@ -104,6 +104,8 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	private TextView txtLidar11;
 	private TextView txtLidar12;
 
+	private LidarThread lidarThread;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -126,6 +128,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 
 		if (savedInstanceState == null) {
 			trameDecoder = new TrameDecoder();
+			trameDecoder.avoidOdoPacket();
 			memoryBufferLidar = new NewMemoryBuffer();
 			memoryBufferLog = new NewMemoryBuffer();
 			memoryBufferMap = new NewMemoryBuffer();
@@ -250,7 +253,8 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			//readSocketThreadLog.start();
 	//		sendSocketThreadMotors.start();
 //			sendSocketThreadActuators.start();
-
+			lidarThread = new LidarThread();
+			lidarThread.start();
 			handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 		}
 	}
@@ -265,14 +269,20 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 		//sendSocketThreadMotors.setStop(false);
 		//sendSocketThreadActuators.setStop(false);
 		handler.removeCallbacks(runnable);
+		lidarThread.finish();
 	}
 
 	private void read_the_queue() {
 		display_lidar_info();
 		display_gps_info();
 		display_lidar_lines();
+		//display_txt();
+		//handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+	}
+	
+	private void display_txt_handler(){
 		display_txt();
-		handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+				handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 	}
 
 	private void display_txt() {
@@ -458,7 +468,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 					byte[] b = new byte[] { 
 							78, 65, 73, 79, 48, 49,
 							1, 0, 0, 0, 2, 
-							-127, -127, 
+							0, -100, 
 							0, 0, 0, 0 };
 					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
@@ -495,7 +505,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 					byte[] b = new byte[] { 
 							78, 65, 73, 79, 48, 49,
 							1, 0, 0, 0,	2, 
-							127, 127, 
+							0, 100, 
 							0, 0, 0, 0 };
 					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
@@ -532,7 +542,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 					byte[] b = new byte[] {
 							78, 65, 73, 79, 48, 49, 
 							1, 0, 0, 0,	2,
-							-127, 127,
+							-100, 100,
 							0, 0, 0, 0 };
 					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
@@ -569,7 +579,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 					byte[] b = new byte[] {
 							78, 65, 73, 79, 48, 49,
 							1, 0, 0, 0,	2, 
-							127, -127, 
+							100, 100, 
 							0, 0, 0, 0 };
 					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
@@ -651,5 +661,28 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			}
 
 		});
+	}
+	
+	private class LidarThread extends Thread {
+
+		private boolean over = false;
+
+		public void run() {
+			while(!over){
+				synchronized (memoryBufferLog.lock) {
+					try {
+						memoryBufferLog.lock.wait(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					read_the_queue();
+				}
+			}
+		}
+
+		public void finish() {
+			 over = true;
+		}
 	}
 }

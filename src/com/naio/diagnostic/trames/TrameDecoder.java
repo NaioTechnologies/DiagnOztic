@@ -15,6 +15,7 @@ public class TrameDecoder {
 	private LidarPacket lidarPacket;
 	private GPSPacket gpsPacket;
 	private StringPacket stringPacket;
+	private boolean notOdo;
 
 	public TrameDecoder(){
 		super();
@@ -23,6 +24,7 @@ public class TrameDecoder {
 		lidarPacket = new LidarPacket();
 		gpsPacket = new GPSPacket();
 		stringPacket = new StringPacket();
+		notOdo = false;
 	}
 
 	public Trame decode(byte[] pollFifo) {
@@ -58,8 +60,11 @@ public class TrameDecoder {
 		case Config.ID_WATCHDOG :
 			return new WatchdogTrame(pollFifo);
 		case Config.ID_ODO_PACKET :
-			return odometryPacket.setBytes(pollFifo);
+			if(!notOdo)
+				return odometryPacket.setBytes(pollFifo);
+			break;
 		case Config.ID_LIDAR_PACKET :
+			Log.e("lidar","lidar packet detected");
 			return lidarPacket.setBytes(pollFifo);
 		case Config.ID_STRING_PACKET :
 			return stringPacket.setBytes(pollFifo);
@@ -106,6 +111,11 @@ public class TrameDecoder {
 	 */
 	public StringPacket getStringPacket() {
 		return stringPacket;
+	}
+
+	public void avoidOdoPacket() {
+		notOdo = true;
+		
 	}
 	
 	
