@@ -1,6 +1,7 @@
 package com.naio.diagnostic.threads;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import com.naio.diagnostic.utils.Config;
 import com.naio.diagnostic.utils.MemoryBuffer;
@@ -35,15 +36,20 @@ public class SendSocketThread extends Thread {
 	public void run() {
 		netClient = new NetClient(Config.HOST, port, "0");
 		netClient.connectWithServer();
+		
 		while (stop) {
 			synchronized (lock1) {
 				try {
 					lock1.wait();
-					if (netClient.getOut() != null) {
-						netClient.getOut().write(bytes);
-						Thread.sleep(10, 0);
-					} else
-						Thread.sleep(10, 0);
+					ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+					int idx = 0;
+					byte[] buffarray = buffer.array();
+					for (byte bit : bytes) {
+						buffarray[idx++] = bit;
+					}
+					netClient.socketChannel.write(buffer);
+					buffer.clear();
+					Thread.sleep(10, 0);
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (InterruptedException e1) {

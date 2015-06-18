@@ -1,0 +1,36 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Ports" >
+        <EditTextPreference
+            android:defaultValue="3331"
+            android:key="port_motors"
+            android:summary="Set the motors port"
+            android:title="Motors port" />
+        <EditTextPreference
+            android:defaultValue="3334"
+            android:key="port_gps"
+            android:summary="Set the gps port"
+            android:title="GPS port" />
+        <EditTextPreference
+            android:defaultValue="3337"
+            android:key="port_lidar"
+            android:summary="Set the lidar port"
+            android:title="Lidar port" />
+        <EditTextPreference
+            android:defaultValue="3337"
+            android:key="port_log"
+            android:summary="Set the log port"
+            android:title="Log port" />
+        <EditTextPreference
+            android:defaultValue="3345"
+            android:key="port_actuator"
+            android:summary="Set the actuator port"
+            android:title="Actuator port" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Back" >
+        <Preference
+            android:key="back_ports"
+            android:title="Retour" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

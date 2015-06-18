@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:key="category_developer"
+        android:title="Developer" >
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="developer_mode"
+            android:summary="Activate the developer mode"
+            android:title="Developer Mode" />
+
+        <EditTextPreference
+            android:defaultValue="192.168.1.1"
+            android:dependency="developer_mode"
+            android:key="ip_socket"
+            android:summary="Set the host IP"
+            android:title="Host IP" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="developer_mode"
+            android:key="all_info_lidar"
+            android:summary="Show all the info of the lidar ( lines ...)"
+            android:title="Lidar display" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="developer_mode"
+            android:key="all_info_camera"
+            android:summary="Show all the info of the camera ( lines ...)"
+            android:title="Camera display" />
+
+<!--         <Preference
+            android:dependency="developer_mode"
+            android:key="screen_id"
+            android:persistent="false"
+            android:title="Packet IDs" >
+        </Preference> -->
+        
+        <Preference
+            android:dependency="developer_mode"
+            android:key="screen_port"
+            android:persistent="false"
+            android:title="Ports" >
+        </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="category_reset"
+        android:title="Default value" >
+        <Preference
+            android:key="button"
+            android:summary="Click to restore default values"
+            android:title="Reset the value" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

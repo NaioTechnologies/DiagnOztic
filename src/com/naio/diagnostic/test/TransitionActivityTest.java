@@ -1,5 +1,6 @@
 package com.naio.diagnostic.test;
 
+import com.naio.diagnostic.R;
 import com.naio.diagnostic.activities.HubActivity;
 import com.robotium.solo.Solo;
 
@@ -26,7 +27,7 @@ public class TransitionActivityTest extends ActivityInstrumentationTestCase2<Hub
 	
 	public void testTransitionHubToLidar(){
 		Solo han = new Solo(getInstrumentation(),mActivity);
-		han.clickOnText("Lidar - Gps - Control");
+		han.clickOnText(mActivity.getString(R.string.hub_go_to_lidar));
 		getInstrumentation().waitForIdleSync();
 		assertTrue("Could not find the activity!", han.searchText("Lidar Oz"));	
 		han.goBack();
@@ -34,7 +35,7 @@ public class TransitionActivityTest extends ActivityInstrumentationTestCase2<Hub
 	
 	public void testTransitionHubToCameras(){
 		Solo han = new Solo(getInstrumentation(),mActivity);
-		han.clickOnText("Cameras");
+		han.clickOnText(mActivity.getString(R.string.hub_go_to_cameras));
 		getInstrumentation().waitForIdleSync();
 		assertTrue("Could not find the activity!", han.searchText("CameraActivity"));	
 		han.goBack();
@@ -42,7 +43,7 @@ public class TransitionActivityTest extends ActivityInstrumentationTestCase2<Hub
 	
 	public void testTransitionHubToDecision(){
 		Solo han = new Solo(getInstrumentation(),mActivity);
-		han.clickOnText("Decision IA");
+		han.clickOnText(mActivity.getString(R.string.hub_go_to_decision));
 		getInstrumentation().waitForIdleSync();
 		assertTrue("Could not find the activity!", han.searchText("DecisionIAActivity"));	
 		han.goBack();
@@ -50,7 +51,7 @@ public class TransitionActivityTest extends ActivityInstrumentationTestCase2<Hub
 	
 	public void testTransitionHubToBilan(){
 		Solo han = new Solo(getInstrumentation(),mActivity);
-		han.clickOnText("Bilan utilisation");
+		han.clickOnText(mActivity.getString(R.string.hub_go_to_bilan));
 		getInstrumentation().waitForIdleSync();
 		assertTrue("Could not find the activity!", han.searchText("BilanUtilisationActivity"));	
 		han.goBack();

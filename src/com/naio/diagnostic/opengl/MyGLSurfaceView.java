@@ -1,8 +1,7 @@
-package com.naio.opengl;
+package com.naio.diagnostic.opengl;
 
 import java.util.ArrayList;
 
-import com.naio.diagnostic.opengl.MyRenderer;
 import com.naio.diagnostic.trames.LogTrame;
 import com.naio.diagnostic.utils.DataManager;
 
@@ -34,19 +33,13 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 	}
 
-	private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-	private float mPreviousX;
-	private float mPreviousY;
-
 	public void update_with_uint16(UInt16[] uint16) {
 		mRenderer.setPosition(uint16);
 		requestRender();
 	}
 
 	public void update_line() {
-		
-			requestRender();
-		
+		requestRender();
 	}
 
 }

@@ -1,14 +1,8 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     tools:context="com.naio.diagnostic.activities.CameraActivity" >
-
-    <android.opengl.GLSurfaceView
-        android:id="@+id/opengl_view"
-        android:layout_width="600px"
-        android:layout_height="600px" />
 
     <ImageView
         android:id="@+id/imageview"
@@ -28,4 +22,42 @@
         android:layout_height="wrap_content"
         android:text="TextView" />
 
-</LinearLayout>
+    <android.opengl.GLSurfaceView
+        android:id="@+id/opengl_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <TextView
+        android:id="@+id/text_image_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text=" "
+        android:textColor="@color/wallet_holo_blue_light"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/text_image_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/text_image_1"
+        android:text=" "
+        android:textColor="@color/wallet_holo_blue_light"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/text_image_3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/text_image_2"
+        android:text=" "
+        android:textColor="@color/wallet_holo_blue_light"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/text_image_4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/text_image_3"
+        android:text=" "
+        android:textColor="@color/wallet_holo_blue_light"
+        android:textSize="20dp" />
+
+</RelativeLayout>

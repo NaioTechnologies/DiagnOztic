@@ -21,24 +21,26 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.naio.diagnostic.R;
+import com.naio.diagnostic.opengl.MyGLSurfaceView;
 import com.naio.diagnostic.opengl.OpenGLES20Fragment;
-import com.naio.diagnostic.threads.ReadSocketThread;
+import com.naio.diagnostic.threads.SelectorThread;
 import com.naio.diagnostic.threads.SendSocketThread;
 import com.naio.diagnostic.trames.GPSTrame;
 import com.naio.diagnostic.trames.LidarTrame;
 import com.naio.diagnostic.trames.LogTrame;
+import com.naio.diagnostic.trames.StringTrame;
 import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.Config;
 import com.naio.diagnostic.utils.DataManager;
-import com.naio.diagnostic.utils.MyMoveListenerForAnalogueView;
 import com.naio.diagnostic.utils.NewMemoryBuffer;
-import com.naio.opengl.MyGLSurfaceView;
-import com.naio.views.AnalogueView;
+import com.naio.diagnostic.views.AnalogueView;
+import com.naio.diagnostic.views.MyMoveListenerForAnalogueView;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,34 +68,43 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	private OpenGLES20Fragment openglfragment;
 	private TrameDecoder trameDecoder;
 	private NewMemoryBuffer memoryBufferLidar;
-	private ReadSocketThread readSocketThreadLidar;
 	private Handler handler = new Handler();
-	private SendSocketThread sendSocketThreadMotors;
 	private GoogleMap map;
 	private MapView maporg;
-	private ReadSocketThread readSocketThreadMap;
+	private SelectorThread selectorThread;
 	private NewMemoryBuffer memoryBufferMap;
 	private boolean firstTimeDisplayTheMap;
 	private List<LatLng> listPointMap;
 	Runnable runnable = new Runnable() {
 		public void run() {
-			read_the_queue();
+			display_txt_handler();
 		}
 	};
 
 	private NewMemoryBuffer memoryBufferLog;
-	private ReadSocketThread readSocketThreadLog;
-	private SendSocketThread sendSocketThreadActuators;
-
+	private SelectorThread readSocketThreadLog;
 	private MapView mapView;
-
 	private MyLocationNewOverlay mMyLocationOverlay;
-
 	private ItemizedIconOverlay<OverlayItem> currentLocationOverlay;
-
 	private ResourceProxyImpl resProxyImpl;
-
 	private ArrayList<GeoPoint> listPointMapView;
+	private int idxActuator;
+	private int idxMotor;
+
+	private TextView txtLidar1;
+	private TextView txtLidar2;
+	private TextView txtLidar3;
+	private TextView txtLidar4;
+	private TextView txtLidar5;
+	private TextView txtLidar6;
+	private TextView txtLidar7;
+	private TextView txtLidar8;
+	private TextView txtLidar9;
+	private TextView txtLidar10;
+	private TextView txtLidar11;
+	private TextView txtLidar12;
+
+	private LidarThread lidarThread;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,21 +128,42 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 
 		if (savedInstanceState == null) {
 			trameDecoder = new TrameDecoder();
+			trameDecoder.avoidOdoPacket();
 			memoryBufferLidar = new NewMemoryBuffer();
 			memoryBufferLog = new NewMemoryBuffer();
 			memoryBufferMap = new NewMemoryBuffer();
 			listPointMap = new ArrayList<LatLng>();
 			listPointMapView = new ArrayList<GeoPoint>();
 			firstTimeDisplayTheMap = true;
-			readSocketThreadMap = new ReadSocketThread(memoryBufferMap,
-					Config.PORT_GPS);
-			readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,
-					Config.PORT_LIDAR);
-			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,
-					Config.PORT_LOG);
+			txtLidar1 = (TextView) findViewById(R.id.txt_lidar_1);
+			txtLidar2 = (TextView) findViewById(R.id.txt_lidar_2);
+			txtLidar3 = (TextView) findViewById(R.id.txt_lidar_3);
+			txtLidar4 = (TextView) findViewById(R.id.txt_lidar_4);
+			txtLidar5 = (TextView) findViewById(R.id.txt_lidar_5);
+			txtLidar6 = (TextView) findViewById(R.id.txt_lidar_6);
+			txtLidar7 = (TextView) findViewById(R.id.txt_lidar_7);
+			txtLidar8 = (TextView) findViewById(R.id.txt_lidar_8);
+			txtLidar9 = (TextView) findViewById(R.id.txt_lidar_9);
+			txtLidar10 = (TextView) findViewById(R.id.txt_lidar_10);
+			txtLidar11 = (TextView) findViewById(R.id.txt_lidar_11);
+			txtLidar12 = (TextView) findViewById(R.id.txt_lidar_12);
+			
+			selectorThread = new SelectorThread(memoryBufferMap,Config.PORT_GPS,SelectorThread.READ);
+			selectorThread.addSocket(memoryBufferLidar, Config.PORT_LIDAR,SelectorThread.READ);
+			selectorThread.addSocket(memoryBufferLog, Config.PORT_LOG,SelectorThread.READ);
+			//TODO : change for this :
+			//selectorThread.addSocket(memoryBufferLog, Config.PORT_LOG,SelectorThread.READ);
+			 
+			idxMotor = selectorThread.addSocket(null, Config.PORT_MOTORS, SelectorThread.WRITE);
+			idxActuator = selectorThread.addSocket(null, Config.PORT_ACTUATOR, SelectorThread.WRITE);
+			/*readSocketThreadLidar = new ReadSocketThread(memoryBufferLidar,	Config.PORT_LIDAR);
+			
+			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,	Config.PORT_LOG);
+			
 			sendSocketThreadMotors = new SendSocketThread(Config.PORT_MOTORS);
-			sendSocketThreadActuators = new SendSocketThread(
-					Config.PORT_ACTUATOR);
+			
+			sendSocketThreadActuators = new SendSocketThread(Config.PORT_ACTUATOR);*/
+			
 			DataManager.getInstance().setPoints_position_oz("");
 			getWindow()
 					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -150,7 +182,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			// enable multitouch
 			mapView.setMultiTouchControls(true);
 			// mapView.setTileSource(TileSourceFactory.MAPNIK);
-			String m_locale = Locale.getDefault().getISO3Language() + "-"
+			/*String m_locale = Locale.getDefault().getISO3Language() + "-"
 					+ Locale.getDefault().getISO3Language();
 			// String m_locale = Locale.getDefault().getDisplayName();
 			BingMapTileSource.retrieveBingKey(this);
@@ -170,14 +202,14 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			mapView.getController()
 					.setCenter(new GeoPoint(43.560597, 1.491833));
 			OverlayItem myLocationOverlayItem = new OverlayItem("Here",
-					"Naio ", new GeoPoint(43.560597, 1.491833));
+					"Naio ", new GeoPoint(43.560597, 1.491833));*/
 			/*
 			 * Drawable myCurrentLocationMarker =
 			 * this.getResources().getDrawable(R.drawable.map_marker_small);
 			 * myLocationOverlayItem.setMarker(myCurrentLocationMarker);
 			 */
 
-			final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
+			/*final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
 			items.add(myLocationOverlayItem);
 			currentLocationOverlay = new ItemizedIconOverlay<OverlayItem>(
 					items,
@@ -192,7 +224,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 							return true;
 						}
 					}, resProxyImpl);
-			mapView.getOverlays().add(currentLocationOverlay);
+			mapView.getOverlays().add(currentLocationOverlay);*/
 
 			set_the_analogueView();
 			set_the_dpadView();
@@ -216,12 +248,13 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			});
 
 			// start the threads
-			readSocketThreadLidar.start();
-			readSocketThreadMap.start();
-			readSocketThreadLog.start();
-			sendSocketThreadMotors.start();
-			sendSocketThreadActuators.start();
-
+			//readSocketThreadLidar.start();
+			selectorThread.start();
+			//readSocketThreadLog.start();
+	//		sendSocketThreadMotors.start();
+//			sendSocketThreadActuators.start();
+			lidarThread = new LidarThread();
+			lidarThread.start();
 			handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 		}
 	}
@@ -230,26 +263,67 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		DataManager.getInstance().write_in_file(this);
-		readSocketThreadLidar.setStop(false);
-		readSocketThreadMap.setStop(false);
-		readSocketThreadLog.setStop(false);
-		sendSocketThreadMotors.setStop(false);
-		sendSocketThreadActuators.setStop(false);
+		//readSocketThreadLidar.setStop(false);
+		selectorThread.setStop(false);
+		//readSocketThreadLog.setStop(false);
+		//sendSocketThreadMotors.setStop(false);
+		//sendSocketThreadActuators.setStop(false);
 		handler.removeCallbacks(runnable);
+		lidarThread.finish();
 	}
 
 	private void read_the_queue() {
 		display_lidar_info();
 		display_gps_info();
 		display_lidar_lines();
-		handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+		//display_txt();
+		//handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+	}
+	
+	private void display_txt_handler(){
+		display_txt();
+				handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+	}
+
+	private void display_txt() {
+		trameDecoder.decode(memoryBufferLog.getPollFifo());
+		StringTrame[] strTr = trameDecoder.getStringPacket().getStringtrames();
+		if(strTr[0] != null)
+			txtLidar1.setText(strTr[0].getText());
+		if(strTr[1] != null)
+			txtLidar2.setText(strTr[1].getText());
+		if(strTr[2] != null)
+			txtLidar3.setText(strTr[2].getText());
+		if(strTr[3] != null)
+			txtLidar4.setText(strTr[3].getText());
+		if(strTr[4] != null)
+			txtLidar5.setText(strTr[4].getText());
+		if(strTr[5] != null)
+			txtLidar6.setText(strTr[5].getText());
+		if(strTr[6] != null)
+			txtLidar7.setText(strTr[6].getText());
+		if(strTr[7] != null)
+			txtLidar8.setText(strTr[7].getText());
+		if(strTr[8] != null)
+			txtLidar9.setText(strTr[8].getText());
+		if(strTr[9] != null)
+			txtLidar10.setText(strTr[9].getText());
+		if(strTr[10] != null)
+			txtLidar11.setText(strTr[10].getText());
+		if(strTr[11] != null)
+			txtLidar12.setText(strTr[11].getText());
+		
 	}
 
 	private void display_gps_info() {
-		GPSTrame gps = (GPSTrame) trameDecoder.decode(memoryBufferMap
-				.getPollFifo());
+		/*GPSTrame gps = (GPSTrame) trameDecoder.decode(memoryBufferMap
+				.getPollFifo());*/
+		//TODO: change for this :
+		trameDecoder.decode(memoryBufferLog.getPollFifo());
+		if( trameDecoder.getGpsPacket() != null){
+		Log.e("gps","gps values :" + trameDecoder.getGpsPacket().getLat()+"   "+ trameDecoder.getGpsPacket().getLon() +"   "+ trameDecoder.getGpsPacket().getAlt());}
 
-		if (gps != null) {
+		/*if (gps != null) {
 			DecimalFormat df = new DecimalFormat("####.##");
 			TextView altitude = (TextView) findViewById(R.id.textview_altitude);
 			altitude.setText("Altitude:" + df.format(gps.getAlt()) + " m");
@@ -258,7 +332,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 					+ " km/h");
 			DataManager.getInstance().write_in_log(
 					"alt and vitesse : " + gps.getAlt() + "---"
-							+ gps.getGroundSpeed() + "\n");
+							+ gps.getGroundSpeed() + "\n");*/
 			/*
 			 * map.clear(); LatLng latlng = new LatLng(gps.getLat(),
 			 * gps.getLon()); PolylineOptions option = new
@@ -273,12 +347,12 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			 * map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 18));
 			 * firstTimeDisplayTheMap = false; }
 			 */
-			GeoPoint latlng = new GeoPoint(gps.getLat(), gps.getLon());
+			/*GeoPoint latlng = new GeoPoint(gps.getLat(), gps.getLon());
 			OverlayItem myLocationOverlayItem = new OverlayItem("Here", "Oz",
 					latlng);
 
 			mapView.getOverlays().clear();
-			listPointMapView.add(latlng);
+			// listPointMapView.add(latlng);
 			RoadManager roadManager = new OSRMRoadManager();
 			ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
 			items.add(myLocationOverlayItem);
@@ -300,31 +374,48 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 				mapView.getController().setZoom(18);
 				mapView.getController().setCenter(latlng);
 				firstTimeDisplayTheMap = false;
-			}
-			Road road = roadManager.getRoad(listPointMapView);
-			Polyline roadOverlay = RoadManager.buildRoadOverlay(road, this);
-			mapView.getOverlays().add(roadOverlay);
-			mapView.invalidate();
-		}
+			}*/
+			// TODO : on affiche vraiment la road ? Plus ça avance et plus elle
+			// devient longue à afficher et ça fait tout ramer
+			/*
+			 * Road road = roadManager.getRoad(listPointMapView); Polyline
+			 * roadOverlay = RoadManager.buildRoadOverlay(road, this);
+			 * mapView.getOverlays().add(roadOverlay);
+			 */
+			//mapView.invalidate();
+		//}
 	}
 
 	private void display_lidar_info() {
-		LidarTrame lidar = (LidarTrame) trameDecoder.decode(memoryBufferLidar
-				.getPollFifo());
-		if (lidar != null) {
+		
+		//LidarTrame lidar = (LidarTrame) trameDecoder.decode(memoryBufferLidar
+				//.getPollFifo());
+		
+		//TODO : change for this :
+		 trameDecoder.decode(memoryBufferLog.getPollFifo());
+		
+		//if (lidar != null) {
+			//TODO : change for this :
+			if( trameDecoder.getLidarPacket().getPointtrame() != null){
+				if(!trameDecoder.getLidarPacket().getPointtrame().getArrayListPoints1DUInt16().isEmpty()){
+			// replace lidar.data_uint16()
 			((MyGLSurfaceView) openglfragment.getView())
-					.update_with_uint16(lidar.data_uint16());
-		}
+					.update_with_uint16( DataManager.convertUint16Array(trameDecoder.getLidarPacket().getPointtrame().getArrayListPoints1DUInt16()));
+				}
+			}
+		//}
+		
 	}
 
 	private void display_lidar_lines() {
 
-		LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog
-				.getPollFifo());
-		if (log != null) {
+		//LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog.getPollFifo());
+		//TODO : change for this :
+		 trameDecoder.decode(memoryBufferLog.getPollFifo());
+		/*if (log != null) {
 			if (log.getType() == 1)
 				((MyGLSurfaceView) openglfragment.getView()).update_line();
-		}
+		}*/
 	}
 
 	private void set_the_analogueView() {
@@ -335,7 +426,7 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 				Gravity.CENTER));
 		analView.setRADIUS(heightTab / 12);
 		analView.setOnMoveListener(new MyMoveListenerForAnalogueView(
-				sendSocketThreadMotors));
+				selectorThread,idxMotor));
 	}
 
 	private void set_the_dpadView() {
@@ -374,9 +465,12 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, -127, -127, 0, 0, 0, 0 };
-					sendSocketThreadMotors.setBytes(b);
+					byte[] b = new byte[] { 
+							78, 65, 73, 79, 48, 49,
+							1, 0, 0, 0, 2, 
+							0, -100, 
+							0, 0, 0, 0 };
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -408,9 +502,12 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, 127, 127, 0, 0, 0, 0 };
-					sendSocketThreadMotors.setBytes(b);
+					byte[] b = new byte[] { 
+							78, 65, 73, 79, 48, 49,
+							1, 0, 0, 0,	2, 
+							0, 100, 
+							0, 0, 0, 0 };
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -442,9 +539,12 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, -127, 127, 0, 0, 0, 0 };
-					sendSocketThreadMotors.setBytes(b);
+					byte[] b = new byte[] {
+							78, 65, 73, 79, 48, 49, 
+							1, 0, 0, 0,	2,
+							-100, 100,
+							0, 0, 0, 0 };
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -476,9 +576,12 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			Runnable mAction = new Runnable() {
 				@Override
 				public void run() {
-					byte[] b = new byte[] { 78, 65, 73, 79, 48, 49, 1, 0, 0, 0,
-							2, 127, -127, 0, 0, 0, 0 };
-					sendSocketThreadMotors.setBytes(b);
+					byte[] b = new byte[] {
+							78, 65, 73, 79, 48, 49,
+							1, 0, 0, 0,	2, 
+							100, 100, 
+							0, 0, 0, 0 };
+					selectorThread.setBytesToWriteForThread(b, idxMotor);
 					mHandler.postDelayed(this, 20);
 				}
 			};
@@ -516,14 +619,17 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 		Button btn = (Button) findViewById(R.id.actuator_down);
 		Button btn2 = (Button) findViewById(R.id.actuator_up);
 		btn.setOnTouchListener(new OnTouchListener() {
-			byte[] byteDown = new byte[] { 78, 65, 73, 79, 48, 49, 0xf, 1, 0,
-					0, 0, 2, 0, 0, 0, 0 };
+			byte[] byteDown = new byte[] { 
+					78, 65, 73, 79, 48, 49,
+					0xf, 1, 0,0, 0, 
+					2,
+					0, 0, 0, 0 };
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					sendSocketThreadActuators.setBytes(byteDown);
+					selectorThread.setBytesToWriteForThread(byteDown, idxActuator);
 					break;
 				case MotionEvent.ACTION_UP:
 					break;
@@ -535,15 +641,18 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 
 		btn2.setOnTouchListener(new OnTouchListener() {
 
-			byte[] byteDown = new byte[] { 78, 65, 73, 79, 48, 49, 0xf, 1, 0,
-					0, 0, 1, 0, 0, 0, 0 };
+			byte[] byteDown = new byte[] { 
+					78, 65, 73, 79, 48, 49,
+					0xf, 1, 0,0, 0, 
+					1, 
+					0, 0, 0, 0 };
 			private Handler mHandler;
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					sendSocketThreadActuators.setBytes(byteDown);
+					selectorThread.setBytesToWriteForThread(byteDown, idxActuator);
 					break;
 				case MotionEvent.ACTION_UP:
 					break;
@@ -552,5 +661,28 @@ public class LidarGPSMotorsActivity extends FragmentActivity {
 			}
 
 		});
+	}
+	
+	private class LidarThread extends Thread {
+
+		private boolean over = false;
+
+		public void run() {
+			while(!over){
+				synchronized (memoryBufferLog.lock) {
+					try {
+						memoryBufferLog.lock.wait(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					read_the_queue();
+				}
+			}
+		}
+
+		public void finish() {
+			 over = true;
+		}
 	}
 }

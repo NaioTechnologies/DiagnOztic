@@ -18,9 +18,17 @@ public class MagnetoTrame extends Trame {
 		}
 		instantiate = true;
 		int offset = Config.LENGHT_FULL_HEADER;
-		magneto_x = new byte[] { data[offset + 1], data[offset] };
-		magneto_y = new byte[] { data[offset + 3], data[offset + 2] };
-		magneto_z = new byte[] { data[offset + 5], data[offset + 4] };
+		magneto_x = new byte[] { 
+				data[offset + 1], 
+				data[offset] };
+		
+		magneto_y = new byte[] {
+				data[offset + 3],
+				data[offset + 2] };
+		
+		magneto_z = new byte[] { 
+				data[offset + 5],
+				data[offset + 4] };
 
 	}
 

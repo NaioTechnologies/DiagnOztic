@@ -52,22 +52,34 @@ public class LogTrame extends Trame {
 						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG + Config.LENGHT_CHECKSUM)) {
 
 					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
-						ligne_a_x = new byte[] { data[offset + 3],
-								data[offset + 2], data[offset + 1],
+						ligne_a_x = new byte[] { 
+								data[offset + 3],
+								data[offset + 2], 
+								data[offset + 1],
 								data[offset] };
-						ligne_a_y = new byte[] { data[offset + 7],
-								data[offset + 6], data[offset + 5],
+						
+						ligne_a_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
 								data[offset + 4] };
-						ligne_b_x = new byte[] { data[offset + 11],
-								data[offset + 10], data[offset + 9],
+						
+						ligne_b_x = new byte[] { 
+								data[offset + 11],
+								data[offset + 10],
+								data[offset + 9],
 								data[offset + 8] };
-						ligne_b_y = new byte[] { data[offset + 15],
-								data[offset + 14], data[offset + 13],
+						
+						ligne_b_y = new byte[] {
+								data[offset + 15],
+								data[offset + 14],
+								data[offset + 13],
 								data[offset + 12] };
+						
 						offset = offset + Config.LINES_SIZE_IN_BYTES;
 						arrayListPoint.add(getPoints());
 					}
-					DataManager.getInstance().fifoLines.offer(arrayListPoint);
+					DataManager.getInstance().offerfifoLines(arrayListPoint);
 				}
 			}
 		} else if (type == TYPE_IMAGES) {
@@ -102,17 +114,22 @@ public class LogTrame extends Trame {
 					Log.e("h and w",""+ dim[0]+"---"+dim[1]);
 					arrayListPoints2D.add(dim);
 					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
-						points2d_x = new byte[] { data[offset + 3],
-								data[offset + 2], data[offset + 1],
+						points2d_x = new byte[] {
+								data[offset + 3],
+								data[offset + 2],
+								data[offset + 1],
 								data[offset] };
-						points2d_y = new byte[] { data[offset + 7],
-								data[offset + 6], data[offset + 5],
+						
+						points2d_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
 								data[offset + 4] };
+						
 						offset = offset + Config.POINTS2D_SIZE_IN_BYTES;
 						arrayListPoints2D.add(getPoint2D());
 					}
-					DataManager.getInstance().fifoPoints2D
-							.offer(arrayListPoints2D);
+					DataManager.getInstance().offerfifoPoints2D(arrayListPoints2D);
 				}
 			}
 		}
@@ -151,12 +168,160 @@ public class LogTrame extends Trame {
 						offset = offset + Config.POINTS3D_SIZE_IN_BYTES;
 						arrayListPoints3D.add(getPoint3D());
 					}
-					DataManager.getInstance().fifoPoints3D
-							.offer(arrayListPoints3D);
+					DataManager.getInstance().offerfifoPoints3D(arrayListPoints3D);
 				
 				}
 			}
 		}
+	}
+
+	public LogTrame() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	public Trame setBytes(byte[] data){
+		int offset = Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG;
+		type = data[Config.LENGHT_FULL_HEADER];
+		if (type == TYPE_LINES) {
+			synchronized (lock) {
+
+				if (data.length == (data[Config.LENGHT_FULL_HEADER + 1]
+						* Config.LINES_SIZE_IN_BYTES
+						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG + Config.LENGHT_CHECKSUM)) {
+
+					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
+						ligne_a_x = new byte[] {
+								data[offset + 3],
+								data[offset + 2],
+								data[offset + 1],
+								data[offset] };
+						
+						ligne_a_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
+								data[offset + 4] };
+						
+						ligne_b_x = new byte[] {
+								data[offset + 11],
+								data[offset + 10],
+								data[offset + 9],
+								data[offset + 8] };
+						
+						ligne_b_y = new byte[] { 
+								data[offset + 15],
+								data[offset + 14],
+								data[offset + 13],
+								data[offset + 12] };
+						
+						offset = offset + Config.LINES_SIZE_IN_BYTES;
+						arrayListPoint.add(getPoints());
+					}
+					DataManager.getInstance().offerfifoLines(arrayListPoint);
+				}
+			}
+		} else if (type == TYPE_IMAGES) {
+			synchronized (lock) {
+				if (data.length > Config.LENGHT_FULL_HEADER
+						+ Config.ID_BYTES_FOR_LOG + Config.LENGHT_CHECKSUM) {
+					/*byte[] datacopy = Arrays.copyOfRange(data,
+							Config.LENGHT_FULL_HEADER + 1, data.length
+									- Config.LENGHT_CHECKSUM);*/
+					DataManager.getInstance().fifoImage.offer(data);
+					//Log.e("truc long",""+Arrays.toString(datacopy));
+				}
+			}
+		} else if (type == TYPE_POINTS2D_CAMERA) {
+			synchronized (lock) {
+				Log.e("h and w",""+ data.length + " visé : " +(data[Config.LENGHT_FULL_HEADER + 1]
+						* Config.POINTS2D_SIZE_IN_BYTES
+						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG
+						+ Config.BYTES_SIZE_W_H + Config.LENGHT_CHECKSUM) );
+				if (data.length == (data[Config.LENGHT_FULL_HEADER + 1]
+						* Config.POINTS2D_SIZE_IN_BYTES
+						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG
+						+ Config.BYTES_SIZE_W_H + Config.LENGHT_CHECKSUM)-1) {
+
+					byte[] width = new byte[] { data[offset], data[offset+1] };
+					byte[] height = new byte[] { data[offset + 2],
+							data[offset + 3] };
+					offset += 4;
+					float[] dim = new float[2];
+					dim[0] = (float) ByteBuffer.wrap(width).getChar(0);
+					dim[1] = (float) ByteBuffer.wrap(height).getChar(0);
+					Log.e("h and w",""+ dim[0]+"---"+dim[1]);
+					arrayListPoints2D.add(dim);
+					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
+						points2d_x = new byte[] {
+								data[offset + 3],
+								data[offset + 2], 
+								data[offset + 1],
+								data[offset] };
+						
+						points2d_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6],
+								data[offset + 5],
+								data[offset + 4] };
+						
+						offset = offset + Config.POINTS2D_SIZE_IN_BYTES;
+						arrayListPoints2D.add(getPoint2D());
+					}
+					DataManager.getInstance().offerfifoPoints2D(arrayListPoints2D);
+				}
+			}
+		}
+		else if(type == TYPE_POINTS3D_CAMERA){
+			synchronized (lock) {
+				Log.e("h and w",""+ data.length + " visé : " +(data[Config.LENGHT_FULL_HEADER + 1]
+						* Config.POINTS3D_SIZE_IN_BYTES
+						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG
+						+ Config.BYTES_SIZE_W_H_D + Config.LENGHT_CHECKSUM) );
+				if (data.length == (data[Config.LENGHT_FULL_HEADER + 1]
+						* Config.POINTS3D_SIZE_IN_BYTES
+						+ Config.LENGHT_FULL_HEADER + Config.ID_BYTES_FOR_LOG
+						+ Config.BYTES_SIZE_W_H_D + Config.LENGHT_CHECKSUM)-1) {
+					byte[] width = new byte[] { data[offset], data[offset+1] };
+					byte[] height = new byte[] { data[offset + 2],
+							data[offset + 3] };
+					byte[] depth = new byte[] { data[offset + 4],
+							data[offset + 5] };
+					offset += 6;
+					float[] dim = new float[3];
+					dim[0] = (float) ByteBuffer.wrap(width).getChar(0);
+					dim[1] = (float) ByteBuffer.wrap(height).getChar(0);
+					dim[2] = (float) ByteBuffer.wrap(depth).getChar(0);
+					Log.e("h and w and d",""+ dim[0]+"---"+dim[1]+"---"+dim[2]);
+					arrayListPoints3D.add(dim);
+					for (int i = 0; i < data[Config.LENGHT_FULL_HEADER + 1]; i++) {
+						points3d_x = new byte[] { 
+								data[offset + 3],
+								data[offset + 2],
+								data[offset + 1],
+								data[offset] };
+						
+						points3d_y = new byte[] { 
+								data[offset + 7],
+								data[offset + 6], 
+								data[offset + 5],
+								data[offset + 4] };
+						
+						points3d_z = new byte[] { 
+								data[offset + 11],
+								data[offset + 10],
+								data[offset + 9],
+								data[offset + 8] };
+						
+						offset = offset + Config.POINTS3D_SIZE_IN_BYTES;
+						arrayListPoints3D.add(getPoint3D());
+					}
+					DataManager.getInstance().offerfifoPoints3D(arrayListPoints3D);
+				
+				}
+			}
+		}
+		return this;
 	}
 
 	private float[] getPoint3D() {

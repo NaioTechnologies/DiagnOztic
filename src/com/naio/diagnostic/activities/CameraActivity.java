@@ -4,9 +4,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.osmdroid.ResourceProxy.bitmap;
+
 import com.naio.diagnostic.R;
 
-import com.naio.diagnostic.threads.ReadSocketThread;
+import com.naio.diagnostic.opengl.TextureRenderer;
+import com.naio.diagnostic.packet.OdometryPacket;
+import com.naio.diagnostic.threads.BitmapThread;
+import com.naio.diagnostic.threads.SelectorThread;
 
 import com.naio.diagnostic.trames.LogTrame;
 import com.naio.diagnostic.trames.OdoTrame;
@@ -14,10 +19,12 @@ import com.naio.diagnostic.trames.TrameDecoder;
 import com.naio.diagnostic.utils.Config;
 import com.naio.diagnostic.utils.DataManager;
 import com.naio.diagnostic.utils.NewMemoryBuffer;
+import com.naio.diagnostic.utils.TextureHelper;
 import com.naio.opengl.CircleMesh;
 import com.naio.opengl.OpenGLRenderer;
 import com.naio.opengl.SimplePlane;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -27,6 +34,8 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLSurfaceView.Renderer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
@@ -52,7 +61,7 @@ import android.widget.TextView;
  * 
  */
 public class CameraActivity extends FragmentActivity {
-	private static final int MILLISECONDS_RUNNABLE = 64; // 64 for 15fps
+	private static final long MILLISECONDS_RUNNABLE = 64; // 64 for 15fps
 
 	private TrameDecoder trameDecoder;
 
@@ -65,12 +74,12 @@ public class CameraActivity extends FragmentActivity {
 	};
 
 	private NewMemoryBuffer memoryBufferLog;
-	private ReadSocketThread readSocketThreadLog;
+	private SelectorThread selectorThread;
 	private ImageView imageview;
 	private int nbrImage;
 	private ImageView imageview_r;
 	private NewMemoryBuffer memoryBufferOdo;
-	private ReadSocketThread readSocketThreadOdo;
+	private SelectorThread readSocketThreadOdo;
 	private TextView odo_display;
 	private ArrayList<float[]> arrayPoints = new ArrayList<float[]>();
 	private static float scaleX = 3.5f;
@@ -79,23 +88,26 @@ public class CameraActivity extends FragmentActivity {
 	private float rapScaleY;
 
 	private SimplePlane plane;
-
-	private OpenGLRenderer renderer;
-
+	private TextureRenderer renderer;
 	private ArrayList<float[]> arrayPoints3d = new ArrayList<float[]>();
+	private TextView txt_opengl;
+	private boolean stop_the_handler;
+	private OdometryPacket ancienPacket = null;
+	private byte[] oldPollFifo = null;
+	private BitmapThread bitmapThread;
+	private GLSurfaceView view;
+	private TextView txt_opengl2;
+	private TextView txt_opengl3;
+	private TextView txt_opengl4;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
+		getActionBar().setBackgroundDrawable(
+				getResources().getDrawable(R.drawable.form));
 		arrayPoints = new ArrayList<float[]>();
 		arrayPoints3d = new ArrayList<float[]>();
-		// change the color of the action bar
-		/*
-		 * getActionBar().setBackgroundDrawable(
-		 * getResources().getDrawable(R.drawable.form));
-		 */
 		// Remove the title bar from the window.
 
 		// Make the windows into full screen mode.
@@ -105,12 +117,19 @@ public class CameraActivity extends FragmentActivity {
 		// setContentView(R.layout.camera_activity);
 		// Create a OpenGL view.
 		// GLSurfaceView view = (GLSurfaceView) findViewById(R.id.opengl_view);
-		GLSurfaceView view = new GLSurfaceView(this);
+		setContentView(R.layout.camera_activity);
+		view = (GLSurfaceView) findViewById(R.id.opengl_view);// new
+																// GLSurfaceView(this);
 
 		// Creating and attaching the renderer.
-		renderer = new OpenGLRenderer();
+		renderer = new TextureRenderer(this);
+		view.setEGLContextClientVersion(2);
 		view.setRenderer(renderer);
-		setContentView(view);
+		txt_opengl = (TextView) findViewById(R.id.text_image_1);
+		txt_opengl2 = (TextView) findViewById(R.id.text_image_2);
+		txt_opengl3 = (TextView) findViewById(R.id.text_image_3);
+		txt_opengl4 = (TextView) findViewById(R.id.text_image_4);
+		stop_the_handler = false;
 		final DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 		final float density = displayMetrics.density;
@@ -196,8 +215,8 @@ public class CameraActivity extends FragmentActivity {
 								float scale = newDist / oldDist;
 								Log.e("agabb", "--" + scale);
 								renderer.scale += (scale - 1) / 10;
-								if (renderer.scale >= 3.8f) {
-									renderer.scale = 3.8f;
+								if (renderer.scale >= 2.4f) {
+									renderer.scale = 2.4f;
 								}
 							}
 
@@ -228,21 +247,7 @@ public class CameraActivity extends FragmentActivity {
 			}
 		});
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		// Create a new plane.
-		plane = new SimplePlane(1, 1);
-		plane.sx = scaleX;
-		plane.sy = scaleY;
-		plane.z = 0.0f;
 
-		rapScaleX = scaleX / 2.5f;
-		rapScaleY = scaleY / 2.5f;
-
-		// Load the texture.
-		plane.loadBitmap(BitmapFactory.decodeResource(getResources(),
-				R.drawable.fleche));
-
-		// Add the plane to the renderer.
-		renderer.addMesh(plane);
 		getSupportFragmentManager().addOnBackStackChangedListener(
 				new OnBackStackChangedListener() {
 					public void onBackStackChanged() {
@@ -299,19 +304,23 @@ public class CameraActivity extends FragmentActivity {
 			trameDecoder = new TrameDecoder();
 
 			memoryBufferLog = new NewMemoryBuffer();
-			memoryBufferOdo = new NewMemoryBuffer();
 
-			readSocketThreadLog = new ReadSocketThread(memoryBufferLog,
-					Config.PORT_LOG);
-			readSocketThreadOdo = new ReadSocketThread(memoryBufferOdo,
-					Config.PORT_ODO);
+			// memoryBufferOdo = new NewMemoryBuffer();
+			selectorThread = new SelectorThread(memoryBufferLog,Config.PORT_LOG,SelectorThread.READ);
+
+			bitmapThread = new BitmapThread(memoryBufferLog);
+
+			/*
+			 * readSocketThreadOdo = new ReadSocketThread(memoryBufferOdo,
+			 * Config.PORT_ODO);
+			 */
 
 			DataManager.getInstance().setPoints_position_oz("");
-			getWindow()
-					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-			readSocketThreadLog.start();
-			readSocketThreadOdo.start();
+			selectorThread.start();
+			bitmapThread.start();
+			// readSocketThreadOdo.start();
 
 			handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 		}
@@ -321,168 +330,32 @@ public class CameraActivity extends FragmentActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		// DataManager.getInstance().write_in_file(this);
+		selectorThread.setStop(false);
+		bitmapThread.quit();
+		// renderer = null;
+		view.onPause();
 
-		readSocketThreadLog.setStop(false);
-		readSocketThreadOdo.setStop(false);
+		// readSocketThreadOdo.setStop(false);
 		handler.removeCallbacks(runnable);
+		stop_the_handler = true;
 
 	}
 
 	private void read_the_queue() {
-		display_image();
-		display_odo();
-		handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
+		display_text();
+		// display_odo();
+		if (!stop_the_handler)
+			handler.postDelayed(runnable, MILLISECONDS_RUNNABLE);
 	}
 
-	private void display_odo() {
-		OdoTrame odo = (OdoTrame) trameDecoder.decode(memoryBufferOdo
-				.getPollFifo());
-		if (odo != null) {
-			odo_display.setText(odo.show());
-		}
 
-	}
-
-	private void display_image() {
-		for (int waz = 0; waz < 2; waz++) {
-			if (waz == 0) {
-				LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog
-						.getPollAntepenultiemeFifo());
-			}
-			if (waz == 1) {
-				LogTrame log = (LogTrame) trameDecoder.decode(memoryBufferLog
-						.getPollFifo());
-			}
-			byte[] data = DataManager.getInstance().getPollFifoImage();
-			if (data == null)
-				return;
-			byte[] dataf = Arrays.copyOfRange(data,
-					Config.LENGHT_FULL_HEADER + 3, data.length
-							- Config.LENGHT_CHECKSUM);
-			Bitmap bm;
-			if (data[Config.LENGHT_FULL_HEADER + 2] == 1) {
-				bm = BitmapFactory.decodeByteArray(dataf, 0, dataf.length);
-				if (bm == null)
-					return;
-
-				plane.loadBitmap(bm);
-			} else {// greyscale here
-				/*
-				 * byte[] dataf2 = Arrays.copyOfRange(dataf, 6, dataf.length -
-				 * Config.LENGHT_CHECKSUM);
-				 */
-				/*
-				 * short width = ByteBuffer.wrap(new
-				 * byte[]{dataf[1],dataf[0]}).getShort(0); short height =
-				 * ByteBuffer.wrap(new byte[]{dataf[3],dataf[2]}).getShort(0);
-				 */
-				byte[] Bits = new byte[752 * 480 * 4 /* width*height*4 */]; // That's
-																			// where
-																			// the
-																			// RGBA
-				// array goes.
-
-				int i;
-				for (i = 0; i < dataf.length; i++) {
-					Bits[i * 4] = Bits[i * 4 + 1] = Bits[i * 4 + 2] = (byte) dataf[i];
-					Bits[i * 4 + 3] = -1;// 0xff, that's the alpha.
-				}
-
-				// Now put these nice RGBA pixels into a Bitmap object
-
-				bm = Bitmap.createBitmap(752, 480, Bitmap.Config.ARGB_8888);
-				bm.copyPixelsFromBuffer(ByteBuffer.wrap(Bits));
-
-			}
-
-			/*
-			 * if (data[Config.LENGHT_FULL_HEADER + 1] == 0) {
-			 * imageview.setImageBitmap(bm); } else {
-			 * 
-			 * imageview_r.setImageBitmap(bm);
-			 * 
-			 * }
-			 */
-			ArrayList<float[]> dataPoints2d = DataManager.getInstance()
-					.getPollFifoPoints2D();
-			ArrayList<float[]> dataPoints3d = DataManager.getInstance()
-					.getPollFifoPoints3D();
-			if (dataPoints2d == null && dataPoints3d == null) {
-				plane.loadBitmap(bm);
-				return;
-			}
-			if (dataPoints3d == null) {
-				float w = dataPoints2d.get(0)[0];
-				float h = dataPoints2d.get(0)[1];
-				float xa = 0, ya = 0;
-
-				for (int i = 1; i < dataPoints2d.size(); i++) {
-					float x = dataPoints2d.get(i)[0];
-					float y = dataPoints2d.get(i)[1];
-					Canvas canvas = new Canvas(bm);
-					Paint paint = new Paint();
-					paint.setAntiAlias(true);
-					paint.setColor(Color.BLUE);
-					canvas.drawCircle(x - 1, y - 1, 6, paint);
-
-					if (arrayPoints.size() <= i - 1) {
-						arrayPoints.add(new float[] { x, y });
-					} else {
-						arrayPoints.get(i - 1)[0] = x;
-						arrayPoints.get(i - 1)[1] = y;
-					}
-					if (i - 1 <= arrayPoints.size()
-							&& i == (dataPoints2d.size() - 1)) {
-						int s = arrayPoints.size();
-						for (int j = (i - 1); j < s; j++) {
-							arrayPoints.remove(j);
-						}
-					}
-				}
-			} else // points 3d
-			{
-				float w = dataPoints3d.get(0)[0];
-				float h = dataPoints3d.get(0)[1];
-				float d = dataPoints3d.get(0)[2];
-				float xa = 0, ya = 0;
-
-				for (int i = 1; i < dataPoints3d.size(); i++) {
-					float x = dataPoints3d.get(i)[0];
-					float y = dataPoints3d.get(i)[1];
-					float z = dataPoints3d.get(i)[2];
-					Canvas canvas = new Canvas(bm);
-					Paint paint = new Paint();
-					paint.setAntiAlias(true);
-					Log.e("zpoint", x+"--"+y+"--" + z);
-					if (z <= 0)
-						paint.setColor(Color.BLUE);
-					if (z <= -1)
-						paint.setColor(Color.GREEN);
-					if (z <= -2)
-						paint.setColor(Color.YELLOW);
-					if (z >= 1)
-						paint.setColor(Color.RED);
-					if (z >= 2)
-						paint.setColor(Color.WHITE);
-					canvas.drawCircle(x - 1, y - 1, 6, paint);
-
-					if (arrayPoints3d.size() <= i - 1) {
-						arrayPoints3d.add(new float[] { x, y });
-					} else {
-						arrayPoints3d.get(i - 1)[0] = x;
-						arrayPoints3d.get(i - 1)[1] = y;
-					}
-					if (i - 1 <= arrayPoints3d.size()
-							&& i == (dataPoints3d.size() - 1)) {
-						int s = arrayPoints3d.size();
-						for (int j = (i - 1); j < s; j++) {
-							arrayPoints3d.remove(j);
-						}
-					}
-				}
-			}
-			plane.loadBitmap(bm);
-		}
+	private void display_text() {
+		String[] test = DataManager.getInstance().getPollFifoStringOdoPacket();
+		if(test != null){
+		txt_opengl.setText(test[0]);
+		txt_opengl2.setText(test[1]);
+		txt_opengl3.setText(test[2]);
+		txt_opengl4.setText(test[3]);}
 	}
 
 	@Override

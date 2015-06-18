@@ -27,8 +27,8 @@ public class LidarTrame extends Trame {
 		}
 		instantiate = true;
 		distance = Arrays.copyOf(data, 542);
-		albedo = Arrays.copyOfRange(data, 542, data.length
-				- Config.LENGHT_CHECKSUM);
+		/*albedo = Arrays.copyOfRange(data, 542, data.length
+				- Config.LENGHT_CHECKSUM);*/
 	}
 
 	public String show() {

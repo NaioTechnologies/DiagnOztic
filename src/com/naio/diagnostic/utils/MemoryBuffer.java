@@ -100,7 +100,8 @@ public class MemoryBuffer {
 				} else {
 
 					memoryBytes = new byte[] {};
-					fifo.offer(b);
+					offer(b);
+					
 
 					DataManager.getInstance().write_in_log(
 							" mess finish ");
@@ -109,6 +110,13 @@ public class MemoryBuffer {
 			}
 		}
 
+	}
+
+	private void offer(byte[] b) {
+		fifo.offer(b);
+		for (int i = 0; i < fifo.size() - 1; i++) {
+			fifo.poll();
+		}
 	}
 
 	public byte[] getPollFifo() {

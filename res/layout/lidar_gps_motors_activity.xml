@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     tools:context="com.naio.diagnostic.activities.LidarGPSMotorsActivity" >
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="2" >
@@ -17,23 +17,139 @@
 
         <TextView
             android:id="@+id/txt_lidar_oz"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:gravity="center"
             android:text="@string/lidar_lidar_title"
             android:textColor="@android:color/holo_green_dark"
             android:textSize="30dp" />
 
         <TextView
             android:id="@+id/txt_lidar_oz_shadow"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginLeft="2dp"
+            android:gravity="center"
             android:text="@string/lidar_lidar_title"
             android:textColor="@android:color/background_light"
             android:textSize="30dp" />
-    </FrameLayout>
+
+        <TextView
+            android:id="@+id/txt_lidar_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_oz_shadow"
+            android:text=" ---1--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_oz_shadow"
+            android:layout_toEndOf="@id/txt_lidar_1"
+            android:text=" ---2--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_1"
+            android:text=" ---3--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_1"
+            android:layout_toEndOf="@id/txt_lidar_3"
+            android:text=" ---4--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_3"
+            android:text=" ---5--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_3"
+            android:layout_toEndOf="@id/txt_lidar_5"
+            android:text=" ---6--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_5"
+            android:text=" ---7--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_5"
+            android:layout_toEndOf="@id/txt_lidar_7"
+            android:text=" ---8--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_7"
+            android:text=" ---9--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_7"
+            android:layout_toEndOf="@id/txt_lidar_9"
+            android:text=" ---10--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_9"
+            android:text=" ---11--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/txt_lidar_12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_lidar_9"
+            android:layout_toEndOf="@id/txt_lidar_11"
+            android:text=" ---12--- "
+            android:textColor="@android:color/background_light"
+            android:textSize="30dp" />
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -46,18 +162,17 @@
             android:layout_height="fill_parent"
             android:layout_weight="1" >
 
-             <fragment
+            <fragment
                 android:id="@+id/map_frag"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                class="com.google.android.gms.maps.MapFragment" /> 
+                class="com.google.android.gms.maps.MapFragment" />
+
             <org.osmdroid.views.MapView
                 android:id="@+id/map_osm"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                > 
+                android:layout_height="fill_parent" >
             </org.osmdroid.views.MapView>
-
 
             <TextView
                 android:layout_width="wrap_content"
@@ -99,21 +214,19 @@
             android:layout_height="fill_parent"
             android:layout_weight="1" >
 
-            
-            <com.naio.views.AnalogueView
+            <com.naio.diagnostic.views.AnalogueView
                 android:id="@+id/analogueView1"
                 android:layout_width="400px"
                 android:layout_height="400px"
                 android:layout_gravity="center" />
-            
 
             <LinearLayout
                 android:id="@+id/dpadview"
-                android:visibility="gone"
                 android:layout_width="500px"
                 android:layout_height="500px"
                 android:layout_gravity="center"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                android:visibility="gone" >
 
                 <LinearLayout
                     android:layout_width="fill_parent"
@@ -132,10 +245,9 @@
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:rotation="180"
                         android:clickable="true"
-                        android:src="@drawable/pointer"
-                        />
+                        android:rotation="180"
+                        android:src="@drawable/pointer" />
 
                     <TextView
                         android:layout_width="fill_parent"
@@ -155,8 +267,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:rotation="-90"
                         android:clickable="true"
+                        android:rotation="-90"
                         android:src="@drawable/pointer" />
 
                     <TextView
@@ -170,8 +282,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:rotation="90"
                         android:clickable="true"
+                        android:rotation="90"
                         android:src="@drawable/pointer" />
                 </LinearLayout>
 
@@ -264,7 +376,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|left"
                 android:text="@string/lidar_button_actuator_up" />
-            
+
             <Button
                 android:id="@+id/changePad"
                 android:layout_width="wrap_content"

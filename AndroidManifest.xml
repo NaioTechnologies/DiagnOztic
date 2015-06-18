@@ -32,8 +32,10 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/logo_diagnostic"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:largeHeap="true" >
         <uses-library android:name="android.test.runner" />
+
         <activity
             android:name="com.naio.diagnostic.activities.LidarGPSMotorsActivity"
             android:screenOrientation="landscape" >
@@ -60,17 +62,21 @@
             android:name="com.naio.diagnostic.activities.DecisionIAActivity"
             android:screenOrientation="landscape" >
         </activity>
+        <activity
+            android:name="com.naio.diagnostic.activities.PreferencesActivity"
+            android:screenOrientation="landscape" >
+        </activity>
 
+      
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyBALS6r9dqKzBwTGVFrTw4Ul9GxWEE439M" />
-        <meta-data
+         <meta-data
             android:name="com.google.android.gms.version"
             android:value="7095000" />
-        <meta-data
+         <meta-data
             android:name="BING_KEY"
             android:value="AgE0qZYVDft7M0LkvJwNRt4vunN7maqhWzS81AmlM6Jq7JxmjxIko905Cz4X8cxA" />
-        <!-- <meta-data android:name="MAPBOX_MAPID" android:value="vbod.lggh6oln" /> -->
     </application>
 
 </manifest>
